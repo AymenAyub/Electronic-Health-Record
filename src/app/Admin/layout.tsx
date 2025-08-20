@@ -1,0 +1,145 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import {
+  Home,
+  UserPlus,
+  Users,
+  CalendarCheck,
+  CreditCard,
+  BarChart2,
+  Settings,
+  LogOut,
+  User,
+  X,
+  LayoutDashboard,
+  Search,
+  Bell,
+  PlusCircle,
+  Building2,
+} from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [hospitalSubdomain, setHospitalSubdomain] = useState("");
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const menuItems = [
+    { key: "dashboard", label: "Dashboard", icon: <Home size={20} />, path: "/Admin" },
+    { key: "doctors", label: "Doctors", icon: <UserPlus size={20} />, path: "/Admin/Doctor" },
+    { key: "staff", label: "Staff", icon: <Users size={20} />, path: "/Admin/Staff" },
+    { key: "patients", label: "Patients", icon: <User size={20} />, path: "/Admin/Patients" },
+    { key: "appointments", label: "Appointments", icon: <CalendarCheck size={20} />, path: "/Admin/Appointments" },
+    { key: "payments", label: "Payments & Billing", icon: <CreditCard size={20} />, path: "/admin/payments" },
+    { key: "reports", label: "Reports & Analytics", icon: <BarChart2 size={20} />, path: "/admin/reports" },
+    { key: "settings", label: "Settings", icon: <Settings size={20} />, path: "/admin/settings" },
+  ];
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    fetch(`http://localhost:5000/api/hospital/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data?.hospital?.subdomain) setHospitalSubdomain(data.hospital.subdomain);
+      })
+      .catch(err => console.error("Failed to fetch hospital domain:", err));
+  }, []);
+
+  return (
+    <div className="flex min-h-screen bg-gray-50 text-gray-800">
+      {/* Sidebar */}
+      <aside
+        className={`flex flex-col transition-[width] duration-300 ${
+          sidebarOpen ? "w-64" : "w-16"
+        } bg-white shadow-lg border-r border-gray-200 overflow-y-auto`}
+      >
+        {/* Logo and toggle */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          {sidebarOpen && <h1 className="text-xl font-bold">Admin</h1>}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="text-gray-600 hover:text-blue-600"
+          >
+            {sidebarOpen ? <X /> : <LayoutDashboard />}
+          </button>
+        </div>
+
+        {/* Custom Menu Items */}
+        <nav className="flex flex-col text-[15px] font-semibold mt-2">
+          <a
+            onClick={() => {
+              if (!hospitalSubdomain) return alert("Hospital not found");
+              window.location.href = `http://localhost:3000/hospital/${hospitalSubdomain}`;
+            }}
+            className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-blue-100"
+          >
+            <Building2 size={20} />
+            {sidebarOpen && <span>Homepage</span>}
+          </a>
+
+          <a
+            onClick={() => router.push("/AddHospital")}
+            className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-blue-100"
+          >
+            <PlusCircle size={20} />
+            {sidebarOpen && <span>Add Hospital</span>}
+          </a>
+        </nav>
+
+        <div className="border-t border-gray-200 my-2"></div>
+
+        {/* Main Menu Items */}
+        <nav className="flex flex-col flex-grow text-[15px] font-semibold">
+          {menuItems.map(({ key, label, icon, path }) => (
+            <div key={key} className="relative group">
+              <a
+                onClick={() => router.push(path)}
+                className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-blue-100 transition-colors ${
+                  pathname === path ? "bg-blue-100 font-semibold text-blue-600" : "text-gray-700"
+                }`}
+              >
+                {icon}
+                {sidebarOpen && <span>{label}</span>}
+              </a>
+            </div>
+          ))}
+        </nav>
+
+        {/* User Profile */}
+        <div className="mt-auto p-4 border-t border-gray-200 flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+            A
+          </div>
+          {sidebarOpen && <span>Admin User</span>}
+          {sidebarOpen && (
+            <a className="ml-auto text-red-600 hover:text-red-800 cursor-pointer">
+              <LogOut size={20} />
+            </a>
+          )}
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
+        {/* Top Navbar */}
+        <header className="w-full bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold">Admin Panel</h2>
+          <div className="flex items-center gap-4">
+            <Search size={18} className="text-gray-500" />
+            <Bell size={20} className="text-gray-600" />
+            <Settings size={20} className="text-gray-600" />
+          </div>
+        </header>
+
+        {/* Children (page content) */}
+        <div className="p-8 overflow-auto bg-white flex-1">{children}</div>
+      </main>
+    </div>
+  );
+}

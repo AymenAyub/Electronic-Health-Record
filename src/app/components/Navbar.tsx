@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function Navbar() {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
+    <header className="fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
         <div className="flex justify-between items-center h-16">
 
@@ -15,7 +15,7 @@ export default function Navbar() {
               width={32}
               height={32}
             />
-            <span className="text-xl font-bold text-blue-600">MediNex</span>
+            <span className="text-xl font-bold text-blue-500 hover:text-blue-700">MediNex</span>
           </div>
 
           {/* Navbar */}
@@ -36,18 +36,18 @@ export default function Navbar() {
 
           {/* Buttons */}
           <div className="flex items-center space-x-4">
-            <Link
+            <a
               href="/Login"
-              className="px-4 py-2 border border-blue-500 text-blue-500 rounded-lg hover:bg-blue-50 transition"
+              className="px-4 py-2 border bg-white border-blue-500 text-blue-500 rounded-lg hover:bg-gradient-to-r hover:from-blue-400 hover:to-blue-500 hover:text-white transition"
             >
               Sign In
-            </Link>
-            <Link
+            </a>
+            <a
               href="/signup"
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+              className="px-4 py-2 bg-gradient-to-r from-blue-400 to-blue-500 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition"
             >
               Sign Up
-            </Link>
+            </a>
           </div>
         </div>
       </div>

@@ -4,8 +4,10 @@ import React, { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { User, Mail, Phone,Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-export default function Register() {
+export default function Signup() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -13,15 +15,40 @@ export default function Register() {
     password: "",
   });
 
+  const [message, setMessage] = useState("");
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Registered successfully!");
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/admin/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessage("Signup successful! Redirecting to login...");
+        setTimeout(() => {
+          router.push("/Login"); 
+        }, 1500);
+      } else {
+        setMessage(data.message || "Signup failed");
+      }
+    } catch (err) {
+      setMessage("Something went wrong");
+    }
+    
   };
 
   return (
@@ -34,7 +61,7 @@ export default function Register() {
 
         {/* White Card */}
         <div
-         className="bg-white/20 rounded-xl w-full max-w-lg p-8 border border-gray-200 z-10 mt-16 mb-20 sm:mt-24 sm:mb-24 shadow-lg shadow-gray-300/40 backdrop-blur-md"
+         className="bg-white rounded-xl w-full max-w-lg p-8 border border-gray-200 z-10 mt-16 mb-20 sm:mt-24 sm:mb-24 shadow-lg shadow-gray-300/40 "
         >
           <h2 className="text-2xl font-bold text-center text-blue-600 mb-4">
             Create Account
@@ -137,6 +164,17 @@ export default function Register() {
               Sign Up
             </button>
           </form>
+
+           {/* Message */}
+           {message && (
+            <p
+              className={`mt-4 text-center text-sm ${
+                message.includes("successful") ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {message}
+            </p>
+          )}
 
           {/* Footer Link */}
           <p className="text-center text-sm text-gray-500 mt-6">

@@ -40,11 +40,11 @@ export default function Services() {
    <>
     <main className="min-h-screen bg-blue-50 py-16 px-6">
       <h1 className="text-4xl font-bold text-center mb-12">Our Services</h1>
-      <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
+      <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-8">
         {features.map((feature, idx) => (
           <div
             key={idx}
-            className="bg-white shadow hover:shadow-lg transition rounded-lg p-6"
+            className="bg-white shadow hover:shadow-lg transition rounded-xl p-6"
           >
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0">{feature.icon}</div>
