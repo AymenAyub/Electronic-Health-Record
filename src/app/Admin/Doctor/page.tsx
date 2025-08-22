@@ -3,32 +3,28 @@
 import { useState, useEffect } from "react";
 import DoctorCard from "@/app/components/Admin/DoctorCard";
 import AddDoctorModal from "@/app/components/Admin/AddDoctorModal";
+import DeleteModal from "@/app/components/Admin/DeleteModal";
 import { UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function DoctorsPage() {
-  const [doctors, setDoctors] = useState<any[]>([]); // initially empty
+  const [doctors, setDoctors] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
-
-  
+  const [editingDoctor, setEditingDoctor] = useState<any | null>(null);
   const [authorized, setAuthorized] = useState(false);
-  const router = useRouter();
+  const [deleteDoctorId, setDeleteDoctorId] = useState<string | null>(null);
+  // const [token, setToken] = useState<string | null>(null);
+  // const [userStr,setUserStr]=useState<string | null>(null);
 
   const token = localStorage.getItem("token");
-    const userStr = localStorage.getItem("user");
+  // setToken(token);
+  const userStr = localStorage.getItem("user");
+  // setUserStr(userStr);
 
-  useEffect(() => {
-    
+  const router = useRouter();
 
-    if (!token || !userStr) {
-      router.push("/Login");
-      
-     }
-
-     setAuthorized(true);
-  
     const fetchDoctors = async () => {
       try {
         const res = await fetch("http://localhost:5000/api/admin/getDoctors", {
@@ -42,46 +38,85 @@ export default function DoctorsPage() {
         alert("Error fetching doctors");
       }
     };
-  
-    fetchDoctors();
-  }, [router]);
-  
 
-
+    useEffect(() => {
+     
+      if (!token || !userStr) {
+        router.push("/Login");
+        return;
+      }
+      setAuthorized(true);
+      fetchDoctors();
+    }, [router]);
+    
   if (!authorized) {
     return null; 
   }
 
+  const handleDelete = async (id: string) => {
   
-
-  const handleAddDoctor = async (doctorData: any) => {
     try {
-      const res = await fetch("http://localhost:5000/api/admin/addDoctor", {
-        method: "POST",
+      const res = await fetch(`http://localhost:5000/api/admin/deleteUser/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (res.ok) {
+        alert("Doctor deleted successfully");
+        fetchDoctors(); 
+      } else {
+        const err = await res.json();
+        alert(err.message || "Failed to delete doctor");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("Something went wrong");
+    }
+    finally {
+      setDeleteDoctorId(null); 
+    }
+  };
+  
+  const handleSaveDoctor = async (doctorData: any) => {
+    try {
+      const url = editingDoctor
+        ? `http://localhost:5000/api/admin/updateUser/${editingDoctor.user_id}`
+        : "http://localhost:5000/api/admin/addDoctor";
+  
+      const method = editingDoctor ? "PUT" : "POST";
+  
+      const res = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(doctorData),
       });
-
+  
       const data = await res.json();
-
+  
       if (res.ok) {
-        setDoctors([...doctors, data.doctor]);
+        fetchDoctors();
+        setIsModalOpen(false);
+        setEditingDoctor(null);
       } else {
-        alert(data.message || "Failed to add doctor");
+        alert(data.message || "Failed to save doctor");
       }
     } catch (err) {
       console.error(err);
-      alert("Error adding doctor");
+      alert("Error saving doctor");
     }
   };
+  
 
   const specialties = Array.from(new Set(doctors.map(d => d.specialty)));
 
   const filteredDoctors = doctors.filter((doctor) => {
-    const matchesName = doctor.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesName = (doctor.name || "").toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSpecialty = selectedSpecialty ? doctor.specialty === selectedSpecialty : true;
     return matchesName && matchesSpecialty;
   });
@@ -90,7 +125,7 @@ export default function DoctorsPage() {
     <div className="p-4">
      
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">Doctors</h1>
+        <h1 className="text-3xl font-bold">Doctors</h1>
         <button
           onClick={() => setIsModalOpen(true)}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
@@ -100,7 +135,6 @@ export default function DoctorsPage() {
         </button>
       </div>
 
-      {/* Search and Filter Section */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <input
           type="text"
@@ -124,24 +158,43 @@ export default function DoctorsPage() {
         </select>
       </div>
 
-      {/* Doctors Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredDoctors.length > 0 ? (
           filteredDoctors.map((doctor) => (
-            <DoctorCard key={doctor.user_id} doctor={doctor} />
+            <DoctorCard 
+            key={doctor.user_id} 
+            doctor={doctor}
+            onEdit={() => setEditingDoctor(doctor)} 
+            // onDelete={() => handleDelete(doctor.user_id)} />
+            onDelete={() => setDeleteDoctorId(doctor.user_id)} />
           ))
         ) : (
           <p className="text-center col-span-full text-gray-500">No doctors found.</p>
         )}
       </div>
 
-      {/* Add Doctor Modal */}
-      {isModalOpen && (
-        <AddDoctorModal
-          onClose={() => setIsModalOpen(false)}
-          onSave={handleAddDoctor} // backend call ke liye
-        />
-      )}
+      {(isModalOpen || editingDoctor) && (
+   <AddDoctorModal
+    isOpen={isModalOpen || !!editingDoctor}
+    onClose={() => {
+      setIsModalOpen(false);
+      setEditingDoctor(null);
+    }}
+    doctor={editingDoctor}
+    onSave={handleSaveDoctor}
+  />
+
+
+  
+)}
+<DeleteModal
+    isOpen={!!deleteDoctorId}
+    onClose={() => setDeleteDoctorId(null)}
+    onConfirm={() => handleDelete(deleteDoctorId!)}
+  />
+
+
+
     </div>
   );
 }

@@ -23,6 +23,9 @@ import { useRouter, usePathname } from "next/navigation";
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [hospitalSubdomain, setHospitalSubdomain] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
   const router = useRouter();
   const pathname = usePathname();
 
@@ -50,6 +53,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       })
       .catch(err => console.error("Failed to fetch hospital domain:", err));
   }, []);
+
+  // filter items for search
+  const filteredItems = menuItems.filter(item =>
+    item.label.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-800">
@@ -128,10 +136,50 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main Content */}
       <main className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
         {/* Top Navbar */}
-        <header className="w-full bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold">Admin Panel</h2>
+        <header className="w-full bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between relative">
+          {/* Title or Search */}
+          {searchOpen ? (
+            
+            <div className="relative w-1/2 mx-auto">
+                
+              <input
+                type="text"
+                placeholder="Search menu..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {/* Dropdown */}
+              {searchQuery && (
+                <ul className="absolute w-full bg-white border border-gray-200 mt-1 rounded-lg shadow-lg z-50">
+                  {filteredItems.length > 0 ? (
+                    filteredItems.map(item => (
+                      <li
+                        key={item.key}
+                        onClick={() => {
+                          router.push(item.path);
+                          setSearchOpen(false);
+                          setSearchQuery("");
+                        }}
+                        className="px-4 py-2 cursor-pointer hover:bg-blue-100"
+                      >
+                        {item.label}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="px-4 py-2 text-gray-500">No matches found</li>
+                  )}
+                </ul>
+              )}
+            </div>
+          ) : (
+            <h2 className="text-xl font-bold">Admin Panel</h2>
+          )}
+
           <div className="flex items-center gap-4">
-            <Search size={18} className="text-gray-500" />
+            <button onClick={() => setSearchOpen(!searchOpen)}>
+              <Search size={20} className="text-gray-600" />
+            </button>
             <Bell size={20} className="text-gray-600" />
             <Settings size={20} className="text-gray-600" />
           </div>
