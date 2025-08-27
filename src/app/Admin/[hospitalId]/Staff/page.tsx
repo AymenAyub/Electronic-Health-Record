@@ -12,10 +12,8 @@ export default function StaffPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
   const [authorized, setAuthorized] = useState(false);
-
+  const [loading, setLoading] = useState(true);
   const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
-
-
   const [deleteStaffId, setDeleteStaffId] = useState<string | null>(null);
   const [editingStaff, setEditingStaff] = useState<any | null>(null);
 
@@ -23,14 +21,10 @@ export default function StaffPage() {
   const hospitalId = params?.hospitalId;
 
   const token = localStorage.getItem("token");
-      // setToken(token);
-      const userStr = localStorage.getItem("user");
-      // setUserStr(userStr);
-
-
+  const userStr = localStorage.getItem("user");
+    
   const router = useRouter();
  
-
   const fetchStaff = async () => {
     try {
       const res = await fetch(`http://localhost:5000/api/admin/getStaff?hospital_id=${hospitalId}`, {
@@ -45,18 +39,19 @@ export default function StaffPage() {
     }
   };
 
-  useEffect(() => {
-    
-    if (!token || !userStr) {
+      useEffect(() => {
+      if (!token || !userStr) {
       router.push("/Login");
-    }
+      return;
 
-    setAuthorized(true);
+      } else {
+      setLoading(false);
+      setAuthorized(true);
+      fetchStaff(); 
+      }
+      }, [router]);
 
-    fetchStaff();
-  }, [router]);
-
-  if (!authorized) 
+    if (!authorized) 
     return null;
 
 
@@ -128,6 +123,11 @@ export default function StaffPage() {
     return matchesName && matchesDesignation;
   });
 
+  
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-6">
@@ -182,14 +182,6 @@ export default function StaffPage() {
                   <td className="px-6 py-3">{s.designation}</td>
                   <td className="px-6 py-3">{s.email}</td>
                   <td className="px-6 py-3">{s.contact}</td>
-                  {/* <td className="px-6 py-3 flex gap-2">
-                    <button 
-                    onClick={() => setEditingStaff(s)}
-                    className="text-blue-600 hover:underline"><Pen size={18}/></button>
-                    <button 
-                    onClick={() => setDeleteStaffId(s.user_id)}
-                    className="text-red-600 hover:underline"><Trash2 size={18}/></button>
-                  </td> */}
                   <td className="px-6 py-3 flex gap-2">
                   <div className="relative">
                     <button

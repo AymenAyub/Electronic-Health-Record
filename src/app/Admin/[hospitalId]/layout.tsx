@@ -29,7 +29,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams();
-  const hospitalId = params?.hospitalId; // dynamic param
+  const hospitalId = params?.hospitalId; 
 
   console.log("Hospital ID:", hospitalId);
 
@@ -45,10 +45,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { key: "settings", label: "Settings", icon: <Settings size={20} />, path: `/Admin/${hospitalId}/settings` },
   ];
 
-  // fetch hospital info
+  const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem("token");
+
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+    if (!token) {
+      router.push("/Login");
+    } else {
+      setLoading(false); 
+    }
+  }, [router]);
+
+
+  useEffect(() => {
 
     if (!hospitalId) return;
 
@@ -62,18 +71,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       .catch(err => console.error("Failed to fetch hospital domain:", err));
   }, [hospitalId]);
 
-  // filter items for search
   const filteredItems = menuItems.filter(item =>
     item.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-800">
-      {/* Sidebar */}
+    
       <aside
         className={`flex flex-col transition-[width] duration-300 ${sidebarOpen ? "w-64" : "w-16"} bg-white shadow-lg border-r border-gray-200 overflow-y-auto`}
       >
-        {/* Logo and toggle */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           {sidebarOpen && <h1 className="text-xl font-bold">Admin</h1>}
           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-gray-600 hover:text-blue-600">
@@ -81,7 +93,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
         </div>
 
-        {/* Custom Menu Items */}
         <nav className="flex flex-col text-[15px] font-semibold mt-2">
           <a
             onClick={() => {
@@ -190,7 +201,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </header>
 
-        {/* Children (page content) */}
         <div className="p-8 overflow-auto bg-white flex-1">{children}</div>
       </main>
     </div>

@@ -15,17 +15,16 @@ export default function DoctorsPage() {
   const [editingDoctor, setEditingDoctor] = useState<any | null>(null);
   const [authorized, setAuthorized] = useState(false);
   const [deleteDoctorId, setDeleteDoctorId] = useState<string | null>(null);
-  // const [token, setToken] = useState<string | null>(null);
-  // const [userStr,setUserStr]=useState<string | null>(null);
 
   const token = localStorage.getItem("token");
-  // setToken(token);
   const userStr = localStorage.getItem("user");
-  // setUserStr(userStr);
 
   const router = useRouter();
   const params = useParams();
   const hospitalId = params?.hospitalId;
+  const [loading, setLoading] = useState(true);
+
+  
 
     const fetchDoctors = async () => {
       try {
@@ -42,14 +41,17 @@ export default function DoctorsPage() {
     };
 
     useEffect(() => {
-     
       if (!token || !userStr) {
         router.push("/Login");
         return;
-      }
+    
+    } else {
+      setLoading(false);
       setAuthorized(true);
-      fetchDoctors();
-    }, [router]);
+      fetchDoctors(); 
+    }
+  }, [router]);
+  
     
   if (!authorized) {
     return null; 
@@ -123,6 +125,10 @@ export default function DoctorsPage() {
     return matchesName && matchesSpecialty;
   });
 
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+
   return (
     <div className="p-4">
      
@@ -167,7 +173,6 @@ export default function DoctorsPage() {
             key={doctor.user_id} 
             doctor={doctor}
             onEdit={() => setEditingDoctor(doctor)} 
-            // onDelete={() => handleDelete(doctor.user_id)} />
             onDelete={() => setDeleteDoctorId(doctor.user_id)} />
           ))
         ) : (

@@ -17,10 +17,24 @@ export default function Dashboard() {
   const router = useRouter();
   const token = localStorage.getItem("token");
 
+  const cards = [
+    { label: "Active Doctors", value: stats.activeDoctors },
+    { label: "Total Patients", value: stats.totalPatients },
+    { label: "Appointments Today", value: stats.appointmentsToday },
+  ];
+
   useEffect(() => {
-    if(!token){
-        return;
+
+    if (!token) {
+      router.push("/Login");
+    } else {
+      setLoading(false); // token hai to page render hoga
     }
+  }, [router]);
+
+ 
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const res2 = await fetch(`http://localhost:5000/api/dashboard/stats/${hospitalId}`, {
@@ -49,13 +63,9 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-
-  const cards = [
-    { label: "Active Doctors", value: stats.activeDoctors },
-    { label: "Total Patients", value: stats.totalPatients },
-    { label: "Appointments Today", value: stats.appointmentsToday },
-  ];
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   return (
     <>

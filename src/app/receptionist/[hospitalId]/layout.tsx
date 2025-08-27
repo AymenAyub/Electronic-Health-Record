@@ -26,12 +26,22 @@ export default function ReceptionistLayout({ children }: { children: React.React
   const pathname = usePathname();
   const params = useParams();
   const hospitalId = params?.hospitalId; // dynamic param
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/Login");
+    } else {
+      setLoading(false); // token hai to page render hoga
+    }
+  }, [router]);
+
+  
   // Menu items specific to receptionist
   const menuItems = [
     { key: "dashboard", label: "Dashboard", icon: <Home size={20} />, path: `/receptionist/${hospitalId}` },
     { key: "patients", label: "Patients", icon: <Users size={20} />, path: `/receptionist/${hospitalId}/Patients` },
-    { key: "add-patient", label: "Add Patient", icon: <UserPlus size={20} />, path: `/receptionist/${hospitalId}/Patients/add` },
     { key: "appointments", label: "Appointments", icon: <CalendarCheck size={20} />, path: `/receptionist/${hospitalId}/Appointments` },
     { key: "payments", label: "Payments", icon: <CreditCard size={20} />, path: `/receptionist/${hospitalId}/Payments` },
     { key: "settings", label: "Settings", icon: <Settings size={20} />, path: `/receptionist/${hospitalId}/Settings` },
@@ -41,6 +51,11 @@ export default function ReceptionistLayout({ children }: { children: React.React
   const filteredItems = menuItems.filter(item =>
     item.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+
 
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-800">

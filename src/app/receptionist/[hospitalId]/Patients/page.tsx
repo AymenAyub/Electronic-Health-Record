@@ -22,6 +22,17 @@ export default function PatientsPage() {
   const userStr = localStorage.getItem("user");
   const router = useRouter();
 
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!token) {
+      router.push("/Login");
+    } else {
+      setLoading(false); // token hai to page render hoga
+    }
+  }, [router]);
+
+ 
   const fetchPatients = async () => {
     try {
       const res = await fetch(`http://localhost:5000/api/getPatients?hospital_id=${hospitalId}`, {
@@ -103,6 +114,10 @@ export default function PatientsPage() {
   const filteredPatients = patients.filter(p =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   return (
     <div className="p-4">

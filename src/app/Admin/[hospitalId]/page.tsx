@@ -20,11 +20,15 @@ export default function Dashboard() {
   const router = useRouter();
   const token = localStorage.getItem("token");
   // console.log("token", token); 
-  if(!token){
-    
-    return;
-  }
+  useEffect(() => {
+    if (!token) {
+      router.push("/Login");
+    } else {
+      setLoading(false); 
+    }
+  }, [router]);
 
+ 
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -73,7 +77,9 @@ export default function Dashboard() {
     fetchData();
   }, []);
   
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   // if (!hasHospital) {
   //   return (

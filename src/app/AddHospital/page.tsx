@@ -23,6 +23,7 @@ export default function RegisterHospital() {
   const [normalized, setNormalized] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const token = localStorage.getItem("token");
   const router = useRouter();
 
 
@@ -40,15 +41,12 @@ export default function RegisterHospital() {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const userStr = localStorage.getItem("user");
-    if (!token || !userStr) {
-      redirect("/login");
-      return;
-    }
-    const user = JSON.parse(userStr);
-    if (user.role !== "admin") {
-      router.push("/");
+    if (!token) {
+      setLoading(true);
+      router.push("/Login");
+
+    } else {
+      setLoading(false); 
     }
   }, [router]);
 
@@ -152,6 +150,10 @@ export default function RegisterHospital() {
       setLoading(false);
     }``
   };
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   return (
     <>

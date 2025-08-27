@@ -2,20 +2,26 @@
 
 import { useEffect, useState } from "react";
 import { Hospital, PlusCircle, Settings, LogOut, X, LayoutDashboard } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, redirect } from "next/navigation";
 
 export default function SelectHospitalPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [hospitals, setHospitals] = useState<any[]>([]);
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/Login");
-      return;
+    } else {
+      setLoading(false); // token hai to page render hoga
     }
+  }, [router]);
 
+  
+
+  useEffect(() => {
     // login ke response me stored hospitals
     const storedHospitals = localStorage.getItem("hospitals");
     if (storedHospitals) {
@@ -47,6 +53,10 @@ export default function SelectHospitalPage() {
   
   //   fetchHospitals();
   // }, [router]);
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
   
 
   return (
