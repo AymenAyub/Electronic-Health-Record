@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Mail, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { log } from "console";
 
 export default function LoginPage() {
   const [message, setMessage] = useState("");
@@ -40,12 +41,37 @@ export default function LoginPage() {
         const data=await res.json();
         console.log(data);
         console.log(data.message);
+        console.log(data.user.role);
+        
   
          if(res.ok){
-          router.push('/Admin');
+          
           localStorage.setItem("token", data.token);
           localStorage.setItem("user", JSON.stringify(data.user));
+          localStorage.setItem("hospitals", JSON.stringify(data.hospitals));
+
+          console.log("res is ok");
+          
+
+          if (data.user.role === "admin") {
+            router.push("/SelectHospital");
+          } 
+          else if (data.user.role === "staff" && data.user.designation === "Receptionist") {
+            console.log(data.user.role);
+            
+            const receptionistHospital = data.hospitals?.[0]; 
+            console.log(receptionistHospital);
+            
+            if (receptionistHospital) {
+               router.push(`/receptionist/${receptionistHospital.hospital.id}`);
+            } else {
+              setMessage("No hospital assigned to this receptionist.");
+            }
+          } 
+          // router.push('/SelectHospital');
+          
         }
+        
         else if(data.message === "User not found") {
            setMessage("User with this email doesn't exist.");
         } 

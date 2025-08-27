@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, } from "react";
 import { Hospital } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
-  const [hasHospital, setHasHospital] = useState(false);
+  // const [hasHospital, setHasHospital] = useState(false);
   const [stats, setStats] = useState<any>({
     activeDoctors: 0,
     registeredStaff: 0,
@@ -14,6 +14,8 @@ export default function Dashboard() {
     appointmentsToday: 0,
     revenueCollected: 0,
   });
+  const params = useParams();
+  const hospitalId = params?.hospitalId; 
 
   const router = useRouter();
   const token = localStorage.getItem("token");
@@ -27,21 +29,21 @@ export default function Dashboard() {
     const fetchData = async () => {
       try {
        
-        const res1 = await fetch("http://localhost:5000/api/hospital/check", {
-          method: "GET", 
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        // const res1 = await fetch(`http://localhost:5000/api/hospital/check/${hospitalId}`, {
+        //   method: "GET", 
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //     Authorization: `Bearer ${token}`,
+        //   },
+        // });
   
-        if (!res1.ok) alert("Unauthorized or failed to fetch hospital");
+        // if (!res1.ok) alert("Unauthorized or failed to fetch hospital");
   
-        const data1 = await res1.json();
-        setHasHospital(data1.hasHospital);
+        // const data1 = await res1.json();
+        // setHasHospital(data1.hasHospital);
   
-        if (data1.hasHospital) {
-          const res2 = await fetch("http://localhost:5000/api/dashboard/stats", {
+        // if (data1.hasHospital) {
+          const res2 = await fetch(`http://localhost:5000/api/dashboard/stats/${hospitalId}`, {
             method: "GET", 
             headers: {
               "Content-Type": "application/json",
@@ -61,7 +63,7 @@ export default function Dashboard() {
             revenueCollected: data2.revenueCollected ?? 0,
           });
         }
-      } catch (err) {
+      catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
@@ -73,25 +75,25 @@ export default function Dashboard() {
   
   if (loading) return <div>Loading...</div>;
 
-  if (!hasHospital) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh] bg-blue-50 rounded-xl p-8 text-center">
-        <Hospital className="w-16 h-16 text-blue-500 mb-4" />
-        <h2 className="text-2xl font-bold text-blue-600 mb-2">
-          You haven’t added your hospital yet!
-        </h2>
-        <p className="text-blue-600 font-semibold mb-4">
-          Add your hospital to start managing your data.
-        </p>
-        <button
-          onClick={() => router.push("/AddHospital")}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2 rounded-md"
-        >
-          Add Hospital
-        </button>
-      </div>
-    );
-  }
+  // if (!hasHospital) {
+  //   return (
+  //     <div className="flex flex-col items-center justify-center min-h-[80vh] bg-blue-50 rounded-xl p-8 text-center">
+  //       <Hospital className="w-16 h-16 text-blue-500 mb-4" />
+  //       <h2 className="text-2xl font-bold text-blue-600 mb-2">
+  //         You haven’t added your hospital yet!
+  //       </h2>
+  //       <p className="text-blue-600 font-semibold mb-4">
+  //         Add your hospital to start managing your data.
+  //       </p>
+  //       <button
+  //         onClick={() => router.push("/AddHospital")}
+  //         className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2 rounded-md"
+  //       >
+  //         Add Hospital
+  //       </button>
+  //     </div>
+  //   );
+  // }
 
   const cards = [
     { label: "Active Doctors", value: stats.activeDoctors },

@@ -7,7 +7,6 @@ import {
   Users,
   CalendarCheck,
   CreditCard,
-  BarChart2,
   Settings,
   LogOut,
   User,
@@ -15,46 +14,30 @@ import {
   LayoutDashboard,
   Search,
   Bell,
-  PlusCircle,
-  Building2,
 } from "lucide-react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useParams } from "next/navigation";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function ReceptionistLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [hospitalSubdomain, setHospitalSubdomain] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const router = useRouter();
   const pathname = usePathname();
+  const params = useParams();
+  const hospitalId = params?.hospitalId; // dynamic param
 
+  // Menu items specific to receptionist
   const menuItems = [
-    { key: "dashboard", label: "Dashboard", icon: <Home size={20} />, path: "/Admin" },
-    { key: "doctors", label: "Doctors", icon: <UserPlus size={20} />, path: "/Admin/Doctor" },
-    { key: "staff", label: "Staff", icon: <Users size={20} />, path: "/Admin/Staff" },
-    { key: "patients", label: "Patients", icon: <User size={20} />, path: "/Admin/Patients" },
-    { key: "appointments", label: "Appointments", icon: <CalendarCheck size={20} />, path: "/Admin/Appointments" },
-    { key: "payments", label: "Payments & Billing", icon: <CreditCard size={20} />, path: "/admin/payments" },
-    { key: "reports", label: "Reports & Analytics", icon: <BarChart2 size={20} />, path: "/admin/reports" },
-    { key: "settings", label: "Settings", icon: <Settings size={20} />, path: "/admin/settings" },
+    { key: "dashboard", label: "Dashboard", icon: <Home size={20} />, path: `/receptionist/${hospitalId}` },
+    { key: "patients", label: "Patients", icon: <Users size={20} />, path: `/receptionist/${hospitalId}/Patients` },
+    { key: "add-patient", label: "Add Patient", icon: <UserPlus size={20} />, path: `/receptionist/${hospitalId}/Patients/add` },
+    { key: "appointments", label: "Appointments", icon: <CalendarCheck size={20} />, path: `/receptionist/${hospitalId}/Appointments` },
+    { key: "payments", label: "Payments", icon: <CreditCard size={20} />, path: `/receptionist/${hospitalId}/Payments` },
+    { key: "settings", label: "Settings", icon: <Settings size={20} />, path: `/receptionist/${hospitalId}/Settings` },
   ];
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    fetch(`http://localhost:5000/api/hospital/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data?.hospital?.subdomain) setHospitalSubdomain(data.hospital.subdomain);
-      })
-      .catch(err => console.error("Failed to fetch hospital domain:", err));
-  }, []);
-
-  // filter items for search
+  // Filter items for search
   const filteredItems = menuItems.filter(item =>
     item.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -67,9 +50,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           sidebarOpen ? "w-64" : "w-16"
         } bg-white shadow-lg border-r border-gray-200 overflow-y-auto`}
       >
-        {/* Logo and toggle */}
+        {/* Logo + Toggle */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          {sidebarOpen && <h1 className="text-xl font-bold">Admin</h1>}
+          {sidebarOpen && <h1 className="text-xl font-bold">Receptionist</h1>}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="text-gray-600 hover:text-blue-600"
@@ -78,32 +61,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
         </div>
 
-        {/* Custom Menu Items */}
-        <nav className="flex flex-col text-[15px] font-semibold mt-2">
-          <a
-            onClick={() => {
-              if (!hospitalSubdomain) return alert("Hospital not found");
-              window.location.href = `http://localhost:3000/hospital/${hospitalSubdomain}`;
-            }}
-            className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-blue-100"
-          >
-            <Building2 size={20} />
-            {sidebarOpen && <span>Homepage</span>}
-          </a>
-
-          <a
-            onClick={() => router.push("/AddHospital")}
-            className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-blue-100"
-          >
-            <PlusCircle size={20} />
-            {sidebarOpen && <span>Add Hospital</span>}
-          </a>
-        </nav>
-
-        <div className="border-t border-gray-200 my-2"></div>
-
-        {/* Main Menu Items */}
-        <nav className="flex flex-col flex-grow text-[15px] font-semibold">
+        {/* Menu Items */}
+        <nav className="flex flex-col flex-grow text-[15px] font-semibold mt-2">
           {menuItems.map(({ key, label, icon, path }) => (
             <div key={key} className="relative group">
               <a
@@ -121,12 +80,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* User Profile */}
         <div className="mt-auto p-4 border-t border-gray-200 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
-            A
-          </div>
-          {sidebarOpen && <span>Admin User</span>}
+          <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">R</div>
+          {sidebarOpen && <span>Receptionist User</span>}
           {sidebarOpen && (
-            <a className="ml-auto text-red-600 hover:text-red-800 cursor-pointer">
+            <a
+              onClick={() => {
+                localStorage.removeItem("token");
+                router.push("/Login");
+              }}
+              className="ml-auto text-red-600 hover:text-red-800 cursor-pointer"
+            >
               <LogOut size={20} />
             </a>
           )}
@@ -139,9 +102,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <header className="w-full bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between relative">
           {/* Title or Search */}
           {searchOpen ? (
-            
             <div className="relative w-1/2 mx-auto">
-                
               <input
                 type="text"
                 placeholder="Search menu..."
@@ -173,7 +134,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               )}
             </div>
           ) : (
-            <h2 className="text-xl font-bold">Admin Panel</h2>
+            <h2 className="text-xl font-bold">Receptionist Panel</h2>
           )}
 
           <div className="flex items-center gap-4">
@@ -185,7 +146,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </header>
 
-        {/* Children (page content) */}
+        {/* Page Content */}
         <div className="p-8 overflow-auto bg-white flex-1">{children}</div>
       </main>
     </div>

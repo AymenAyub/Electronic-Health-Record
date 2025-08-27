@@ -132,9 +132,16 @@ export default function RegisterHospital() {
 
       const data = await res.json();
 
-      if (res.ok) {
+      if (res.ok && data.hospital) {
+        setFormData({ name: "", email: "", subdomain: "", phone: "", address: "" });
         setMessage("Hospital registered successfully!");
-        setTimeout(() => router.push("/Admin"), 1200);
+        const existingHospitals = JSON.parse(localStorage.getItem("hospitals") || "[]");
+        const updatedHospitals = [...existingHospitals,  { hospital: data.hospital }];
+        localStorage.setItem(
+        "hospitals",
+       JSON.stringify(updatedHospitals)
+  );
+        setTimeout(() => router.push("/SelectHospital"), 1200);
       } else {
         setMessage(data.message || "Failed to register hospital");
       }
@@ -143,7 +150,7 @@ export default function RegisterHospital() {
       setMessage("Something went wrong");
     } finally {
       setLoading(false);
-    }
+    }``
   };
 
   return (

@@ -5,7 +5,7 @@ import DoctorCard from "@/app/components/Admin/DoctorCard";
 import AddDoctorModal from "@/app/components/Admin/AddDoctorModal";
 import DeleteModal from "@/app/components/Admin/DeleteModal";
 import { UserPlus } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 export default function DoctorsPage() {
   const [doctors, setDoctors] = useState<any[]>([]);
@@ -24,10 +24,12 @@ export default function DoctorsPage() {
   // setUserStr(userStr);
 
   const router = useRouter();
+  const params = useParams();
+  const hospitalId = params?.hospitalId;
 
     const fetchDoctors = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/admin/getDoctors", {
+        const res = await fetch(`http://localhost:5000/api/admin/getDoctors?hospital_id=${hospitalId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -56,7 +58,7 @@ export default function DoctorsPage() {
   const handleDelete = async (id: string) => {
   
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/deleteUser/${id}`, {
+      const res = await fetch(`http://localhost:5000/api/admin/deleteUser/${id}?hospital_id=${hospitalId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

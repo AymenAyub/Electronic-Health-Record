@@ -2,9 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { User, Stethoscope, Phone, Mail, Key } from "lucide-react";
-import { redirect } from "next/navigation";
+import { redirect , useParams} from "next/navigation";
 
 export default function AddDoctorModal({ onClose, onSave, doctor }: any) {
+  const params = useParams();
+  const hospitalId = params?.hospitalId;
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -12,14 +15,18 @@ export default function AddDoctorModal({ onClose, onSave, doctor }: any) {
     specialty: "",
     contact: "",
     bio: "",
+    hospital_id: hospitalId 
+
   });
+
+ 
 
   const token = localStorage.getItem("token");
   const userStr = localStorage.getItem("user");
 
-  if (!token || !userStr) {
-    redirect("/login");
-  }
+  useEffect(() => {
+    if (!token || !userStr) redirect("/login");
+  }, [token, userStr]);
 
   useEffect(() => {
     if (doctor) {
@@ -30,7 +37,10 @@ export default function AddDoctorModal({ onClose, onSave, doctor }: any) {
         specialty: doctor.specialty || "",
         contact: doctor.contact || "",
         bio: doctor.bio || "",
+        hospital_id: hospitalId
       });
+    } else {
+      setFormData(prev => ({ ...prev, hospital_id: hospitalId || "" }));
     }
   }, [doctor]);
 

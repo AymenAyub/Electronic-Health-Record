@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { User, Mail, Phone,Lock } from "lucide-react";
+import { User, Mail, Phone,Lock, Contact } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function Signup() {
@@ -11,7 +11,7 @@ export default function Signup() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
+    contact: "",
     password: "",
   });
 
@@ -138,17 +138,17 @@ export default function Signup() {
             {/* Phone */}
             <div className="relative">
               <label
-                htmlFor="phone"
+                htmlFor="contact"
                 className="block text-gray-700 font-medium mb-1"
               >
                 Phone Number
               </label>
               <Phone className="absolute left-3 top-10 text-gray-400" size={18} />
               <input
-                id="phone"
+                id="contact"
                 type="tel"
-                name="phone"
-                value={formData.phone}
+                name="contact"
+                value={formData.contact}
                 onChange={handleChange}
                 placeholder="Enter phone number"
                 required

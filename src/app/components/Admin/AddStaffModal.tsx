@@ -2,16 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { User, Briefcase, Phone, Mail, Key } from "lucide-react";
-import { redirect } from "next/navigation";
+import { redirect, useParams } from "next/navigation";
 
 export default function AddStaffModal({ onClose, onSave, staff }: any) {
+  const params = useParams();
+  const hospitalId = params?.hospitalId;
   const [formData, setFormData] = useState({
     name: "",
     designation: "",
     contact: "",
     email: "",
     password: "",
-  });
+    hospital_id : hospitalId
+    });
 
   
   const token = localStorage.getItem("token");
@@ -29,7 +32,10 @@ export default function AddStaffModal({ onClose, onSave, staff }: any) {
         password: "", 
         designation: staff.designation || "",
         contact: staff.contact || "",
+        hospital_id : hospitalId
       });
+    } else {
+      setFormData(prev => ({ ...prev, hospital_id: hospitalId || "" }));
     }
   }, [staff]);
 
@@ -41,7 +47,7 @@ export default function AddStaffModal({ onClose, onSave, staff }: any) {
 
   const handleSubmit = async () => {
     const { name, designation, contact, email, password } = formData;
-    if (!name || !contact || !email || !password) {
+    if (!name || !contact || !email || !password || !designation) {
       alert("Please fill all required fields");
       return;
     }
