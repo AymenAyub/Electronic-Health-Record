@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, } from "react";
-import { Hospital } from "lucide-react";
+import { CalendarCheck, Hospital , User, Stethoscope} from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 
 export default function Dashboard() {
@@ -101,51 +101,115 @@ export default function Dashboard() {
   //   );
   // }
 
-  const cards = [
-    { label: "Active Doctors", value: stats.activeDoctors },
-    { label: "Registered Staff", value: stats.registeredStaff },
-    { label: "Total Patients", value: stats.totalPatients },
-    { label: "Appointments Today", value: stats.appointmentsToday },
-    { label: "Revenue Collected", value: `${stats.revenueCollected}` },
-  ];
+  // const cards = [
+  //   { label: "Active Doctors", value: stats.activeDoctors },
+  //   { label: "Registered Staff", value: stats.registeredStaff },
+  //   { label: "Total Patients", value: stats.totalPatients },
+  //   { label: "Appointments Today", value: stats.appointmentsToday },
+  //   { label: "Revenue Collected", value: `${stats.revenueCollected}` },
+  // ];
 
-  return (
-    <>
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-        {cards.map(({ label, value }) => (
-          <div
-            key={label}
-            className="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center justify-center min-h-[90px] border border-gray-50 hover:text-blue-700 hover:bg-blue-50"
-          >
-            <span className="text-xl font-bold">{value}</span>
-            <span className="text-sm text-gray-400 font-bold mt-1 hover:text-blue-700">
-              {label}
-            </span>
-          </div>
-        ))}
+//   return (
+//     <>
+//       {/* Summary Cards */}
+//       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+//         {cards.map(({ label, value }) => (
+//           <div
+//             key={label}
+//             className="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center justify-center min-h-[90px] border border-gray-50 hover:text-blue-700 hover:bg-blue-50"
+//           >
+//             <span className="text-xl font-bold">{value}</span>
+//             <span className="text-sm text-gray-400 font-bold mt-1 hover:text-blue-700">
+//               {label}
+//             </span>
+//           </div>
+//         ))}
+//       </div>
+
+//       {/* Recent Activities Table (empty for now) */}
+//       <section className="mb-8 max-w-6xl mx-auto">
+//         <h3 className="text-xl font-semibold mb-4">Recent Activities</h3>
+//         <div className="overflow-x-auto bg-white rounded-md shadow border border-gray-200">
+//           <table className="w-full text-sm text-left text-gray-600">
+//             <thead className="bg-gray-100 text-gray-700 text-xs uppercase">
+//               <tr>
+//                 <th className="px-4 py-3">Time</th>
+//                 <th className="px-4 py-3">Type</th>
+//                 <th className="px-4 py-3">Doctor</th>
+//                 <th className="px-4 py-3">Patient</th>
+//                 <th className="px-4 py-3">Notes</th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               {/* Empty for now */}
+//             </tbody>
+//           </table>
+//         </div>
+//       </section>
+//     </>
+//   );
+// }
+return (
+  <>
+    {/* Welcome Card */}
+    <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl p-6 mb-8 shadow-lg flex items-center justify-between">
+      <div>
+        <h1 className="text-3xl font-bold">Welcome to your Dashboard</h1>
+        <p className="mt-1 text-sm opacity-90">Here's your daily summary</p>
+      </div>
+      <Stethoscope size={40} className="opacity-90" />
+    </div>
+
+    {/* Summary Cards */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      {/* Active Doctors */}
+      <div className="bg-white rounded-xl shadow p-5 flex items-center gap-4 border border-gray-200 hover:bg-blue-50 transition-colors cursor-pointer">
+        <Stethoscope className="text-blue-500" size={28} />
+        <div className="flex flex-col">
+          <span className="text-lg font-bold text-gray-900">{stats.activeDoctors}</span>
+          <span className="text-sm text-gray-500">Active Doctors</span>
+        </div>
       </div>
 
-      {/* Recent Activities Table (empty for now) */}
-      <section className="mb-8 max-w-6xl mx-auto">
-        <h3 className="text-xl font-semibold mb-4">Recent Activities</h3>
-        <div className="overflow-x-auto bg-white rounded-md shadow border border-gray-200">
-          <table className="w-full text-sm text-left text-gray-600">
-            <thead className="bg-gray-100 text-gray-700 text-xs uppercase">
-              <tr>
-                <th className="px-4 py-3">Time</th>
-                <th className="px-4 py-3">Type</th>
-                <th className="px-4 py-3">Doctor</th>
-                <th className="px-4 py-3">Patient</th>
-                <th className="px-4 py-3">Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* Empty for now */}
-            </tbody>
-          </table>
+      {/* Total Patients */}
+      <div className="bg-white rounded-xl shadow p-5 flex items-center gap-4 border border-gray-200 hover:bg-blue-50 transition-colors cursor-pointer">
+        <User className="text-green-500" size={28} />
+        <div className="flex flex-col">
+          <span className="text-lg font-bold text-gray-900">{stats.totalPatients}</span>
+          <span className="text-sm text-gray-500">Total Patients</span>
         </div>
-      </section>
-    </>
-  );
+      </div>
+
+      {/* Appointments Today */}
+      <div className="bg-white rounded-xl shadow p-5 flex items-center gap-4 border border-gray-200 hover:bg-blue-50 transition-colors cursor-pointer">
+        <CalendarCheck className="text-yellow-500" size={28} />
+        <div className="flex flex-col">
+          <span className="text-lg font-bold text-gray-900">{stats.appointmentsToday}</span>
+          <span className="text-sm text-gray-500">Appointments Today</span>
+        </div>
+      </div>
+    </div>
+
+    {/* Recent Activities Table (empty for now) */}
+    <section className="mb-8 max-w-6xl mx-auto">
+      <h3 className="text-xl font-semibold mb-4 text-gray-700">Recent Activities</h3>
+      <div className="overflow-x-auto bg-white rounded-md shadow border border-gray-200">
+        <table className="w-full text-sm text-left text-gray-600">
+          <thead className="bg-gray-100 text-gray-700 text-xs uppercase">
+            <tr>
+              <th className="px-4 py-3">Time</th>
+              <th className="px-4 py-3">Type</th>
+              <th className="px-4 py-3">Doctor</th>
+              <th className="px-4 py-3">Patient</th>
+              <th className="px-4 py-3">Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* Empty for now */}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </>
+);
 }

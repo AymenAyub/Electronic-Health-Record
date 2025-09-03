@@ -44,7 +44,7 @@ export default function DoctorCard({ doctor, onEdit, onDelete }: { doctor: any, 
       {/* Doctor info */}
       <div>
         <h2 className="text-xl font-semibold text-gray-900">{doctor.name}</h2>
-        <div className="flex items-center text-sm text-gray-600 mt-2">
+        <div className="flex items-center text-sm font-semibold text-gray-600 mt-2">
           <Stethoscope size={18} className="mr-2 text-blue-600" />
           <span>{doctor.specialty}</span>
         </div>
@@ -58,7 +58,7 @@ export default function DoctorCard({ doctor, onEdit, onDelete }: { doctor: any, 
       </div>
 
       {/* Contact */}
-      <div className="flex items-center text-sm text-gray-600 mt-4">
+      <div className="flex items-center text-sm font-semibold text-gray-600 mt-4">
         <Phone size={18} className="mr-2 text-green-600" />
         <span>{doctor.contact}</span>
       </div>

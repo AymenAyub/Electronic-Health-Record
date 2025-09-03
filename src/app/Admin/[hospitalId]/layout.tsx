@@ -47,6 +47,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
+  const [hospitalName, setHospitalName] = useState<string>("Hospital");
 
   useEffect(() => {
     if (!token) {
@@ -55,6 +56,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       setLoading(false); 
     }
   }, [router]);
+
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+  
+    const fetchHospital = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/hospital/${hospitalId}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        console.log(data);
+        
+        setHospitalName(data.hospital.name);
+        console.log(hospitalName);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+  
+    fetchHospital();
+  }, [hospitalId]);
+  
 
 
   useEffect(() => {
@@ -71,6 +100,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       .catch(err => console.error("Failed to fetch hospital domain:", err));
   }, [hospitalId]);
 
+
+
+
   const filteredItems = menuItems.filter(item =>
     item.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -86,9 +118,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside
         className={`flex flex-col transition-[width] duration-300 ${sidebarOpen ? "w-64" : "w-16"} bg-white shadow-lg border-r border-gray-200 overflow-y-auto`}
       >
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          {sidebarOpen && <h1 className="text-xl font-bold">Admin</h1>}
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-gray-600 hover:text-blue-600">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          {sidebarOpen && <h1 className="text-xl text-blue-600 font-bold">{hospitalName}</h1>}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="text-gray-600 hover:text-blue-600"
+          >
             {sidebarOpen ? <X /> : <LayoutDashboard />}
           </button>
         </div>

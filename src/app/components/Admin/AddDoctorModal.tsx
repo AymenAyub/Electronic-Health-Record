@@ -85,7 +85,7 @@ export default function AddDoctorModal({ onClose, onSave, doctor }: any) {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full pl-10 pr-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 text-sm"
+                className="w-full pl-10 pr-3 py-2 border  border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 text-sm"
               />
             </div>
 
@@ -99,7 +99,7 @@ export default function AddDoctorModal({ onClose, onSave, doctor }: any) {
                 value={formData.specialty}
                 onChange={handleChange}
                 required
-                className="w-full pl-10 pr-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 text-sm"
+                className="w-full pl-10 pr-3 py-2 border  border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 text-sm"
               />
             </div>
           </div>
@@ -116,7 +116,7 @@ export default function AddDoctorModal({ onClose, onSave, doctor }: any) {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full pl-10 pr-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 text-sm"
+                className="w-full pl-10 pr-3 py-2 border  border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 text-sm"
               />
             </div>
 
@@ -131,7 +131,7 @@ export default function AddDoctorModal({ onClose, onSave, doctor }: any) {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="w-full pl-10 pr-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 text-sm"
+                  className="w-full pl-10 pr-3 py-2 border  border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 text-sm"
                 />
               </div>
             )}
@@ -148,7 +148,7 @@ export default function AddDoctorModal({ onClose, onSave, doctor }: any) {
               value={formData.contact}
               onChange={handleChange}
               required
-              className="w-full pl-10 pr-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 text-sm"
+              className="w-full pl-10 pr-3 py-2 border  border-gray-300  rounded-md focus:ring-2 focus:ring-blue-400 text-sm"
             />
           </div>
 
@@ -160,7 +160,7 @@ export default function AddDoctorModal({ onClose, onSave, doctor }: any) {
               placeholder="Enter bio"
               value={formData.bio}
               onChange={handleChange}
-              className="w-full pl-3 pr-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 text-sm"
+              className="w-full pl-3 pr-3 py-2 border  border-gray-300  rounded-md focus:ring-2 focus:ring-blue-400 text-sm"
             />
           </div>
 
@@ -186,3 +186,4 @@ export default function AddDoctorModal({ onClose, onSave, doctor }: any) {
     </div>
   );
 }
+

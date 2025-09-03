@@ -218,3 +218,4 @@ export default function AddPatientModal({ onClose, onSave, patient }: any) {
     </div>
   );
 }
+

@@ -1,37 +1,33 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Hospital, Stethoscope, CalendarCheck, User } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
+import { CalendarCheck, User, Stethoscope, Clock } from "lucide-react";
 
-export default function Dashboard() {
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<any>({
-    activeDoctors: 0,
-    totalPatients: 0,
-    appointmentsToday: 0,
-  });
-  const params = useParams();
-  const hospitalId = params?.hospitalId; 
-
+export default function DoctorDashboard() {
   const router = useRouter();
-  const token = localStorage.getItem("token");
-  
-  useEffect(() => {
+  const params = useParams();
+  const hospitalId = params?.hospitalId;
 
+  const [loading, setLoading] = useState(true);
+  const [hospitalName, setHospitalName] = useState<string>("Hospital");  const [stats, setStats] = useState({
+    appointmentsToday: 0,
+    totalPatients: 0
+  });
+
+  const token = localStorage.getItem("token");
+
+  // Token check
+  useEffect(() => {
     if (!token) {
       router.push("/Login");
     } else {
-      setLoading(false); // token hai to page render hoga
+      setLoading(false);
     }
-  }, [router]);
+  }, [router, token]);
+  
 
-  // const cards = [
-  //   { label: "Active Doctors", value: stats.activeDoctors , icon: <Stethoscope/>},
-  //   { label: "Total Patients", value: stats.totalPatients, icon: <User/> },
-  //   { label: "Appointments Today", value: stats.appointmentsToday , icon: <Calendar/>},
-  // ];
-
+  // Fetch stats (mocked for now, replace with API)
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -47,7 +43,6 @@ export default function Dashboard() {
 
         const data2 = await res2.json();
         setStats({
-          activeDoctors: data2.activeDoctors ?? 0,
           totalPatients: data2.totalPatients ?? 0,
           appointmentsToday: data2.appointmentsToday ?? 0,
         });
@@ -61,56 +56,14 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
+   
+
   if (loading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
-  // return (
-  //   <>
-      
-
-  //     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-  //       {cards.map(({ label, value, icon }) => (
-  //         <div
-  //           key={label}
-  //           className="bg-white rounded-xl border border-gray-200 p-5 flex items-center shadow-sm cursor-pointer hover:bg-gray-50 transition-colors min-h-[80px]"
-  //         >
-  //           <div className="p-3 rounded-full bg-blue-100 text-blue-500 mr-4">
-  //             {icon}
-  //           </div>
-  //           <div className="flex flex-col justify-center">
-  //             <span className="text-lg font-bold text-gray-900">{value} <span className="text-sm text-gray-500 ml-1 font-semibold">{label}</span></span>
-  //           </div>
-  //         </div>
-  //       ))}
-  //     </div>
-
-
-  //     {/* Recent Activities Table */}
-  //     <section className="mb-8 max-w-6xl mx-auto">
-  //       <h3 className="text-xl font-semibold mb-4">Recent Activities</h3>
-  //       <div className="overflow-x-auto bg-white rounded-md shadow border border-gray-200">
-  //         <table className="w-full text-sm text-left text-gray-600">
-  //           <thead className="bg-gray-100 text-gray-700 text-xs uppercase">
-  //             <tr>
-  //               <th className="px-4 py-3">Time</th>
-  //               <th className="px-4 py-3">Type</th>
-  //               <th className="px-4 py-3">Doctor</th>
-  //               <th className="px-4 py-3">Patient</th>
-  //               <th className="px-4 py-3">Notes</th>
-  //             </tr>
-  //           </thead>
-  //           <tbody>
-  //             {/* Empty for now */}
-  //           </tbody>
-  //         </table>
-  //       </div>
-  //     </section>
-  //   </>
-  // );
-
   return (
-    <div className=" min-h-screen">
+    <div className="min-h-screen">
       {/* Welcome Card */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl p-6 mb-8 shadow-lg flex items-center justify-between">
         <div>
@@ -119,7 +72,7 @@ export default function Dashboard() {
         </div>
         <Stethoscope size={40} className="opacity-90" />
       </div>
-  
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-xl p-5 shadow flex items-center gap-4 border border-gray-200">
@@ -129,7 +82,7 @@ export default function Dashboard() {
             <p className="text-sm text-gray-500">Appointments Today</p>
           </div>
         </div>
-  
+
         <div className="bg-white rounded-xl p-5 shadow flex items-center gap-4 border border-gray-200">
           <User className="text-green-500" size={28} />
           <div>
@@ -137,17 +90,9 @@ export default function Dashboard() {
             <p className="text-sm text-gray-500">Total Patients</p>
           </div>
         </div>
-  
-        <div className="bg-white rounded-xl p-5 shadow flex items-center gap-4 border border-gray-200">
-          <Stethoscope className="text-yellow-500" size={28} />
-          <div>
-            <p className="text-lg font-bold">{stats.activeDoctors}</p>
-            <p className="text-sm text-gray-500">Active Doctors</p>
-          </div>
-        </div>
-      </div>
-  
-      {/* Recent Activities Table */}
+
+       </div>
+
       <section className="mb-8 max-w-6xl mx-auto">
         <h3 className="text-xl font-semibold mb-4 text-gray-700">Recent Activities</h3>
         <div className="overflow-x-auto bg-white rounded-md shadow border border-gray-200">
@@ -156,7 +101,6 @@ export default function Dashboard() {
               <tr>
                 <th className="px-4 py-3">Time</th>
                 <th className="px-4 py-3">Type</th>
-                <th className="px-4 py-3">Doctor</th>
                 <th className="px-4 py-3">Patient</th>
                 <th className="px-4 py-3">Notes</th>
               </tr>
@@ -169,5 +113,4 @@ export default function Dashboard() {
       </section>
     </div>
   );
-  
 }

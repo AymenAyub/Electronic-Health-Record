@@ -68,6 +68,18 @@ export default function LoginPage() {
               setMessage("No hospital assigned to this receptionist.");
             }
           } 
+          else if (data.user.role === "doctor") {
+            console.log(data.user.role);
+            
+            const doctorHospital = data.hospitals?.[0]; 
+            console.log(doctorHospital);
+            
+            if (doctorHospital) {
+               router.push(`/doctor/${doctorHospital.hospital.id}`);
+            } else {
+              setMessage("No hospital assigned to this receptionist.");
+            }
+          } 
           // router.push('/SelectHospital');
           
         }

@@ -15,14 +15,13 @@ export default function SelectHospitalPage() {
     if (!token) {
       router.push("/Login");
     } else {
-      setLoading(false); // token hai to page render hoga
+      setLoading(false);
     }
   }, [router]);
 
   
 
   useEffect(() => {
-    // login ke response me stored hospitals
     const storedHospitals = localStorage.getItem("hospitals");
     if (storedHospitals) {
       setHospitals(JSON.parse(storedHospitals));
@@ -31,29 +30,6 @@ export default function SelectHospitalPage() {
   }, [router]);
 
   console.log("stored hospitals", hospitals)
-  // useEffect(() => {
-  //   const fetchHospitals = async () => {
-  //     const token = localStorage.getItem("token");
-  //     if (!token) return router.push("/Login");
-  
-  //     try {
-  //       const res = await fetch("http://localhost:5000/api/hospital/check", {
-  //         method: "GET",
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       });
-  //       if (!res.ok) alert("Failed to fetch hospitals");
-  
-  //       const data = await res.json();
-  //       setHospitals(data.hospitals || []);
-  //       localStorage.setItem("hospitals", JSON.stringify(data.hospitals || []));
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   };
-  
-  //   fetchHospitals();
-  // }, [router]);
-
   if (loading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
