@@ -227,6 +227,7 @@ console.log("hospitalId from useParams:", hospitalId);
         </div>
 
         <select
+         title="dateFilter"
           name="dateFilter"
           value={dateFilter}
           onChange={(e) => {

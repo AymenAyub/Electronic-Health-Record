@@ -49,40 +49,30 @@ export default function LoginPage() {
           localStorage.setItem("token", data.token);
           localStorage.setItem("user", JSON.stringify(data.user));
           localStorage.setItem("hospitals", JSON.stringify(data.hospitals));
+         
+          const defaultHospitalId =
+            data.defaultHospitalId ??
+            data.hospitals?.[0]?.hospital?.id ??
+            null;
 
-          console.log("res is ok");
-          
+            const hospitalRole = data.hospitals?.[0]?.role;
+            const resolvedRole = hospitalRole ?? data.user?.role ?? null;
+            if (resolvedRole) localStorage.setItem("role", resolvedRole);       
 
-          if (data.user.role === "admin") {
-            router.push("/SelectHospital");
-          } 
-          else if (data.user.role === "staff" && data.user.designation === "Receptionist") {
-            console.log(data.user.role);
-            
-            const receptionistHospital = data.hospitals?.[0]; 
-            console.log(receptionistHospital);
-            
-            if (receptionistHospital) {
-               router.push(`/receptionist/${receptionistHospital.hospital.id}`);
-            } else {
-              setMessage("No hospital assigned to this receptionist.");
+
+              if (defaultHospitalId) {
+                localStorage.setItem("lastHospitalId", defaultHospitalId);
+                router.push(`/dashboard/${defaultHospitalId}`);
+              }
+          //  else {
+              //   if (data.user?.role === "admin") {
+              //     router.push("/AddHospital");
+              //   } else {
+              //     setMessage("No hospital assigned to this account. Contact admin.");
+              //   }
+              // }
+              router.push(`/dashboard/${defaultHospitalId}`);
             }
-          } 
-          else if (data.user.role === "doctor") {
-            console.log(data.user.role);
-            
-            const doctorHospital = data.hospitals?.[0]; 
-            console.log(doctorHospital);
-            
-            if (doctorHospital) {
-               router.push(`/doctor/${doctorHospital.hospital.id}`);
-            } else {
-              setMessage("No hospital assigned to this receptionist.");
-            }
-          } 
-          // router.push('/SelectHospital');
-          
-        }
         
         else if(data.message === "User not found") {
            setMessage("User with this email doesn't exist.");
@@ -93,9 +83,6 @@ export default function LoginPage() {
         else {
           setMessage("Login failed!");
         }
-      
-      
-     
        }
        catch(error){
         setMessage("Something went wrong. Try Again!");

@@ -275,6 +275,7 @@ export default function DoctorAvailability() {
               End Time
             </label>
             <input
+              title="time"
               type="time"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={currentSlot.endTime}
@@ -290,6 +291,7 @@ export default function DoctorAvailability() {
               Slot Duration (mins)
             </label>
             <select
+            title="slots"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={currentSlot.slotDuration}
               onChange={(e) =>
@@ -352,14 +354,14 @@ export default function DoctorAvailability() {
                     <td className="px-6 py-3">{slot.slotDuration} min</td>
                     <td className="px-6 py-3 flex gap-2">
                       <div className="relative">
-                        <button
+                        <a
                           onClick={() => handleEdit(idx)}
                           onMouseEnter={() => setHoveredIcon(`edit-${idx}`)}
                           onMouseLeave={() => setHoveredIcon(null)}
                           className="p-1 rounded-full hover:bg-gray-100"
                         >
                           <Pen size={18} className="text-blue-600" />
-                        </button>
+                        </a>
                         {hoveredIcon === `edit-${idx}` && (
                           <div className="absolute -top-7 left-0 bg-gray-700 text-white text-xs px-2 py-1 rounded-md shadow-lg">
                             Edit
@@ -368,14 +370,14 @@ export default function DoctorAvailability() {
                       </div>
 
                       <div className="relative">
-                        <button
+                        <a
                           onClick={() => handleDelete(idx)}
                           onMouseEnter={() => setHoveredIcon(`delete-${idx}`)}
                           onMouseLeave={() => setHoveredIcon(null)}
                           className="p-1 rounded-full hover:bg-gray-100"
                         >
                           <Trash2 size={18} className="text-red-600" />
-                        </button>
+                        </a>
                         {hoveredIcon === `delete-${idx}` && (
                           <div className="absolute -top-7 left-0 bg-gray-700 text-white text-xs px-2 py-1 rounded-md shadow-lg">
                             Delete

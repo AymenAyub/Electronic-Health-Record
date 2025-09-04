@@ -131,7 +131,7 @@ export default function RegisterHospital() {
       const data = await res.json();
 
       if (res.ok && data.hospital) {
-        setFormData({ name: "", email: "", subdomain: "", phone: "", address: "" });
+        // setFormData({ name: "", email: "", subdomain: "", phone: "", address: "" });
         setMessage("Hospital registered successfully!");
         const existingHospitals = JSON.parse(localStorage.getItem("hospitals") || "[]");
         const updatedHospitals = [...existingHospitals,  { hospital: data.hospital }];
@@ -139,7 +139,9 @@ export default function RegisterHospital() {
         "hospitals",
        JSON.stringify(updatedHospitals)
   );
-        setTimeout(() => router.push("/SelectHospital"), 1200);
+        // setTimeout(() => router.push("/SelectHospital"), 1200);
+      setTimeout(() => router.push(`/dashboard/${data.hospital.id}`), 1200);
+
       } else {
         setMessage(data.message || "Failed to register hospital");
       }

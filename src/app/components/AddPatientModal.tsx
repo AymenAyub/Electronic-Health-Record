@@ -117,6 +117,7 @@ export default function AddPatientModal({ onClose, onSave, patient }: any) {
               <label className="block text-gray-700 font-medium mb-1">Gender</label>
               <Users className="absolute left-3 top-10 text-gray-400" size={18} />
               <select
+              title="gender"
                 name="gender"
                 value={formData.gender}
                 onChange={handleChange}
