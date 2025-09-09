@@ -28,7 +28,7 @@ export default function PatientsPage() {
     if (!token) {
       router.push("/Login");
     } else {
-      setLoading(false); // token hai to page render hoga
+      setLoading(false); 
     }
   }, [router]);
 
@@ -173,14 +173,14 @@ export default function PatientsPage() {
                   <td className="px-6 py-3">{p.contact}</td>
                   <td className="px-6 py-3 flex gap-2">
                     <div className="relative">
-                      <a
+                      <button
                         onClick={() => setEditingPatient(p)}
                         onMouseEnter={() => setHoveredIcon(`edit-${p.patient_id}`)}
                         onMouseLeave={() => setHoveredIcon(null)}
                         className="p-1 rounded-full hover:bg-gray-100"
                       >
                         <Pen size={18} className="text-blue-600" />
-                      </a>
+                      </button>
                       {hoveredIcon === `edit-${p.patient_id}` && (
                         <div className="absolute -top-7 left-0 bg-gray-700 text-white text-xs px-2 py-1 rounded-md shadow-lg">
                           Edit
@@ -189,14 +189,14 @@ export default function PatientsPage() {
                     </div>
 
                     <div className="relative">
-                      <a
+                      <button
                         onClick={() => setDeletePatientId(p.patient_id)}
                         onMouseEnter={() => setHoveredIcon(`delete-${p.patient_id}`)}
                         onMouseLeave={() => setHoveredIcon(null)}
                         className="p-1 rounded-full hover:bg-gray-100"
                       >
                         <Trash2 size={18} className="text-red-600" />
-                      </a>
+                      </button>
                       {hoveredIcon === `delete-${p.patient_id}` && (
                         <div className="absolute -top-7 left-0 bg-gray-700 text-white text-xs px-2 py-1 rounded-md shadow-lg">
                           Delete
@@ -231,7 +231,9 @@ export default function PatientsPage() {
       <DeleteModal
         isOpen={!!deletePatientId}
         onClose={() => setDeletePatientId(null)}
+        
         onConfirm={() => handleDelete(deletePatientId!)}
+       itemName="this patient"
       />
     </div>
   );

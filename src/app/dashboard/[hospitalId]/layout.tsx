@@ -7,6 +7,7 @@ import {
   PlusCircle, Building2, FileText, Clock
 } from "lucide-react";
 import { useRouter, usePathname, useParams } from "next/navigation";
+import UserProfileDropdown from "@/app/components/UserProfileDropdown";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -139,22 +140,22 @@ useEffect(() => {
       { key: "patients", label: "Patients", icon: <User size={20} />, path: `/dashboard/${hospitalId}/Patients` },
       { key: "appointments", label: "Appointments", icon: <CalendarCheck size={20} />, path: `/dashboard/${hospitalId}/Appointments` },
       { key: "payments", label: "Payments & Billing", icon: <CreditCard size={20} />, path: `/dashboard/${hospitalId}/Payments` },
-      { key: "reports", label: "Reports & Analytics", icon: <BarChart2 size={20} />, path: `/dashboard/${hospitalId}/Reports` },
+      // { key: "reports", label: "Reports & Analytics", icon: <BarChart2 size={20} />, path: `/dashboard/${hospitalId}/Reports` },
       { key: "settings", label: "Settings", icon: <Settings size={20} />, path: `/dashboard/${hospitalId}/Settings` },
     ],
     doctor: [
       { key: "dashboard", label: "Dashboard", icon: <Home size={20} />, path: `/dashboard/${hospitalId}` },
       { key: "availability", label: "My Availability", icon: <Clock size={20} />, path: `/dashboard/${hospitalId}/availability` },
       { key: "appointments", label: "Appointments", icon: <CalendarCheck size={20} />, path: `/dashboard/${hospitalId}/Appointments` },
-      { key: "medicalHistory", label: "Medical History", icon: <FileText size={20} />, path: `/dashboard/${hospitalId}/medical-history` },
-      { key: "settings", label: "Settings", icon: <Settings size={20} />, path: `/dashboard/${hospitalId}/settings` },
+      { key: "medicalHistory", label: "Medical History", icon: <FileText size={20} />, path: `/dashboard/${hospitalId}/MedicalHistory` },
+      { key: "settings", label: "Settings", icon: <Settings size={20} />, path: `/dashboard/${hospitalId}/Settings` },
     ],
     staff: [
       { key: "dashboard", label: "Dashboard", icon: <Home size={20} />, path: `/dashboard/${hospitalId}` },
-      { key: "doctors", label: "Doctors", icon: <UserPlus size={20} />, path: `/dashboard/${hospitalId}/Doctor` },
+      // { key: "doctors", label: "Doctors", icon: <UserPlus size={20} />, path: `/dashboard/${hospitalId}/Doctor` },
       { key: "patients", label: "Patients", icon: <User size={20} />, path: `/dashboard/${hospitalId}/Patients` },
       { key: "appointments", label: "Appointments", icon: <CalendarCheck size={20} />, path: `/dashboard/${hospitalId}/Appointments` },
-      { key: "settings", label: "Settings", icon: <Settings size={20} />, path: `/dashboard/${hospitalId}/settings` },
+      { key: "settings", label: "Settings", icon: <Settings size={20} />, path: `/dashboard/${hospitalId}/Settings` },
     ],
   };
 
@@ -250,25 +251,9 @@ useEffect(() => {
         )}
       </nav>
 
-
-        {/* User Profile */}
         <div className="mt-auto p-4 border-t border-gray-200 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
-            {role?.charAt(0).toUpperCase()}
-          </div>
-          {sidebarOpen && <span className="capitalize">{role} Panel</span>}
-          {sidebarOpen && (
-            <a
-              onClick={() => {
-                localStorage.clear();
-                router.push("/Login");
-              }}
-              className="ml-auto text-red-600 hover:text-red-800 cursor-pointer"
-            >
-              <LogOut size={20} />
-            </a>
-          )}
-        </div>
+        {sidebarOpen && <UserProfileDropdown role={role} />}
+      </div>
       </aside>
 
 

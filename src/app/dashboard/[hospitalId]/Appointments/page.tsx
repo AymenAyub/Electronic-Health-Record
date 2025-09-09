@@ -10,9 +10,9 @@ export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [patients, setPatients] = useState<any[]>([]);
   const [doctors, setDoctors] = useState<any[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);  const [dateFilter, setDateFilter] = useState<"all" | "today" | "week" | "month">("all");
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [dateFilter, setDateFilter] = useState<"all" | "today" | "week" | "month">("all");
   const [statusFilter, setStatusFilter] = useState<"All" | "Scheduled" | "Completed" | "Cancelled">("All");
-
   const [searchTerm, setSearchTerm] = useState("");
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,35 +20,41 @@ export default function AppointmentsPage() {
   const [loading, setLoading] = useState(true);
   const [editingAppointment, setEditingAppointment] = useState<any | null>(null);
 
-
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
   const userStr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+  const user = userStr ? JSON.parse(userStr) : null;
+  const role = user?.role; // "Admin", "Staff", "Doctor"
 
   const router = useRouter();
   const params = useParams();
-const hospitalId = params?.hospitalId;
-console.log("hospitalId from useParams:", hospitalId);
+  const hospitalId = params?.hospitalId;
 
+  console.log('role', role);
+  
 
+  // Fetch appointments role-based
   const fetchAppointments = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/appointments?hospital_id=${hospitalId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
+      let url = "";
+      if (role === "doctor") {
+        url = "http://localhost:5000/api/getDoctorAppointments"; // only their appointments
+      } else {
+        url = `http://localhost:5000/api/appointments?hospital_id=${hospitalId}`;
+      }
+
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      console.log('hospitalId', hospitalId);
 
       if (res.ok) {
         setAppointments(
           data.appointments.map((a: any) => ({
             ...a,
-            appointment_date: new Date(a.appointment_date + "T00:00:00") // force local midnight
+            appointment_date: new Date(a.appointment_date + "T00:00:00"),
           }))
         );
-      }
-      else {
+      } else {
         alert(data.message || "Failed to fetch appointments");
       }
     } catch (err) {
@@ -57,7 +63,9 @@ console.log("hospitalId from useParams:", hospitalId);
     }
   };
 
+  // Fetch patients (Admin & Staff)
   const fetchPatients = async () => {
+    if (role === "doctor") return;
     try {
       const res = await fetch(`http://localhost:5000/api/getPatients?hospital_id=${hospitalId}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -71,7 +79,9 @@ console.log("hospitalId from useParams:", hospitalId);
     }
   };
 
+  // Fetch doctors (Admin & Staff)
   const fetchDoctors = async () => {
+    if (role === "doctor") return;
     try {
       const res = await fetch(`http://localhost:5000/api/admin/getDoctors?hospital_id=${hospitalId}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -105,75 +115,55 @@ console.log("hospitalId from useParams:", hospitalId);
   }, [hospitalId, token]);
 
   const handleSaveAppointment = async (appointmentData: any) => {
-  try {
-    console.log(editingAppointment.id);
-    const url = editingAppointment
-      ? `http://localhost:5000/api/updateAppointment/${editingAppointment.id}`
-      : "http://localhost:5000/api/scheduleAppointment";
-    const method = editingAppointment ? "PUT" : "POST";
+    try {
+      const url = editingAppointment
+        ? `http://localhost:5000/api/updateAppointment/${editingAppointment.id}`
+        : "http://localhost:5000/api/scheduleAppointment";
+      const method = editingAppointment ? "PUT" : "POST";
 
-    const res = await fetch(url, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ ...appointmentData, hospital_id: hospitalId }),
-    });
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ ...appointmentData, hospital_id: hospitalId }),
+      });
 
-    const data = await res.json();
-    if (res.ok) {
-      if (editingAppointment) {
-        setAppointments((prev) =>
-          prev.map((apt) =>
-            apt.appointment_id === editingAppointment.id
-              ? { ...apt, ...data.data }
-              : apt
-          )
-        );
+      const data = await res.json();
+      if (res.ok) {
+        fetchAppointments();
+        setIsModalOpen(false);
+        setEditingAppointment(null);
       } else {
-        setAppointments([
-          ...appointments,
-          {
-            ...data.data,
-            appointment_date: new Date(data.data.appointment_date),
-            start_time: data.data.start_time,
-            end_time: data.data.end_time,
-          },
-        ]);
+        alert(data.message || "Failed to save appointment");
       }
-      fetchAppointments();
-      setIsModalOpen(false);
-      setEditingAppointment(null);
-    } else {
-      alert(data.message || "Failed to save appointment");
+    } catch (err) {
+      console.error(err);
+      alert("Error saving appointment");
     }
-  } catch (err) {
-    console.error(err);
-    alert("Error saving appointment");
-  }
-};
+  };
 
+  // Filter appointments
   const filteredAppointments = appointments
-  .map(a => ({ ...a, appointment_date: new Date(a.appointment_date) }))
-  .filter((apt) => {
+    .map((a) => ({ ...a, appointment_date: new Date(a.appointment_date) }))
+    .filter((apt) => {
+      let matchDate = true;
+      if (selectedDate) matchDate = isSameDay(apt.appointment_date, selectedDate);
+      else if (dateFilter === "today") matchDate = isSameDay(apt.appointment_date, new Date());
+      else if (dateFilter === "week") matchDate = isThisWeek(apt.appointment_date);
+      else if (dateFilter === "month") matchDate = isThisMonth(apt.appointment_date);
 
-    let matchDate = true;
-    if (selectedDate) matchDate = isSameDay(apt.appointment_date, selectedDate);
-    else if (dateFilter === "today") matchDate = isSameDay(apt.appointment_date, new Date());
-    else if (dateFilter === "week") matchDate = isThisWeek(apt.appointment_date);
-    else if (dateFilter === "month") matchDate = isThisMonth(apt.appointment_date);
+      let matchStatus = statusFilter === "All" ? true : apt.status === statusFilter;
 
-    let matchStatus = statusFilter === "All" ? true : apt.status === statusFilter;
+      const patientName = apt.patient_name ? apt.patient_name.toLowerCase() : "";
+      const doctorName = apt.doctor_name ? apt.doctor_name.toLowerCase() : "";
+      const matchSearch =
+        patientName.includes(searchTerm.toLowerCase()) ||
+        doctorName.includes(searchTerm.toLowerCase());
 
-    const patientName = apt.patient_name ? apt.patient_name.toLowerCase() : "";
-    const doctorName = apt.doctor_name ? apt.doctor_name.toLowerCase() : "";
-    const matchSearch =
-      patientName.includes(searchTerm.toLowerCase()) ||
-      doctorName.includes(searchTerm.toLowerCase());
-
-    return matchDate && matchStatus && matchSearch;
-  });
+      return matchDate && matchStatus && matchSearch;
+    });
 
   const getDatesInMonth = (month: Date) => {
     const year = month.getFullYear();
@@ -183,7 +173,6 @@ console.log("hospitalId from useParams:", hospitalId);
   };
 
   const datesInMonth = getDatesInMonth(currentMonth);
-
   const handlePrevMonth = () =>
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
   const handleNextMonth = () =>
@@ -198,20 +187,43 @@ console.log("hospitalId from useParams:", hospitalId);
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-2 mb-3 md:mb-0">
           <Calendar size={28} className="text-blue-600" />
+         <div className="flex flex-col gap-1">
           <h1 className="text-3xl md:text-3xl font-bold text-blue-600 tracking-tight">
-            Schedule Appointments
+            {role === "doctor"
+              ? "Your Appointments"
+              : role === "staff"
+              ? "Schedule Appointments"
+              : role === "admin"
+              ? "Manage Appointments"
+              : "Appointments"}
           </h1>
+
+          <p className="text-sm text-gray-500">
+            {role === "doctor"
+              ? "View all your upcoming appointments"
+              : role === "staff"
+              ? "Add and manage appointments for your hospital"
+              : role === "admin"
+              ? "Overview and control of all hospital appointments"
+              : ""}
+          </p>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 text-white px-5 py-3 rounded-xl hover:bg-blue-700 transition-all duration-200 flex items-center gap-2 font-semibold"
-        >
-          <UserPlus size={20} />
-          Add Appointment
-        </button>
+
+        </div>
+
+        {/* Add Appointment button → Admin & Staff only */}
+        {(role === "admin" || role === "staff") && (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-blue-600 text-white px-5 py-3 rounded-xl hover:bg-blue-700 transition-all duration-200 flex items-center gap-2 font-semibold"
+          >
+            <UserPlus size={20} />
+            Add Appointments
+          </button>
+        )}
       </div>
 
-      {/* Search & Filter */}
+      {/* Search & Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="flex-grow relative">
           <input
@@ -227,7 +239,6 @@ console.log("hospitalId from useParams:", hospitalId);
         </div>
 
         <select
-         title="dateFilter"
           name="dateFilter"
           value={dateFilter}
           onChange={(e) => {
@@ -236,29 +247,29 @@ console.log("hospitalId from useParams:", hospitalId);
           }}
           className="w-full md:w-56 border border-gray-200 rounded-lg font-semibold px-4 py-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1 transition-all duration-200 hover:shadow-md"
         >
-         <option value="all">All</option>
-
+          <option value="all">All</option>
           <option value="today">Today</option>
           <option value="week">This Week</option>
           <option value="month">This Month</option>
         </select>
       </div>
 
+      {/* Status Buttons */}
       <div className="flex gap-3 mb-4">
-      {["All", "Scheduled", "Completed", "Cancelled"].map((status) => (
-        <button
-          key={status}
-          onClick={() => setStatusFilter(status as any)}
-          className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-            statusFilter === status
-              ? "bg-blue-600 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-blue-50"
-          }`}
-        >
-          {status}
-        </button>
-      ))}
-    </div>
+        {["All", "Scheduled", "Completed", "Cancelled"].map((status) => (
+          <button
+            key={status}
+            onClick={() => setStatusFilter(status as any)}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+              statusFilter === status
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-blue-50"
+            }`}
+          >
+            {status}
+          </button>
+        ))}
+      </div>
 
       {/* Appointments Table */}
       <div className="overflow-x-auto bg-white shadow-md rounded-lg mb-6">
@@ -270,9 +281,10 @@ console.log("hospitalId from useParams:", hospitalId);
               <th className="px-6 py-3">Date</th>
               <th className="px-6 py-3">Time</th>
               <th className="px-6 py-3">Status</th>
-              <th className="px-6 py-3">Actions</th>
+                {(role === "admin" || role === "staff") && (
+              <th className="px-6 py-3">Actions</th>)}
 
-              
+              {(role === "Admin" || role === "Staff") && <th className="px-6 py-3">Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -282,10 +294,8 @@ console.log("hospitalId from useParams:", hospitalId);
                   <td className="px-6 py-3">{apt.patient_name}</td>
                   <td className="px-6 py-3">{apt.doctor_name}</td>
                   <td className="px-6 py-3">{format(apt.appointment_date, "dd MMM yyyy")}</td>
-                  <td className="px-6 py-3">
-                    {apt.start_time} - {apt.end_time}
-                  </td>
-                  <td className="px-6 py-3">
+                  <td className="px-6 py-3">{apt.start_time} - {apt.end_time}</td>
+                   <td className="px-6 py-3">
                     <span
                       className={`px-3 py-1 rounded-full text-sm ${
                         apt.status === "Scheduled" || apt.status === "Completed"
@@ -296,23 +306,25 @@ console.log("hospitalId from useParams:", hospitalId);
                       {apt.status}
                     </span>
                   </td>
-                  <td className="px-6 py-3 flex gap-2">
-                <button
-                  onClick={() => {
-                        setEditingAppointment(apt);
-                        setIsModalOpen(true);
-                      }}
-                  className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-yellow-600 text-xs"
-                >
-                  Edit
-                </button>
-              </td>
 
+                  {(role === "admin" || role === "staff") && (
+                    <td className="px-6 py-3 flex gap-2">
+                      <button
+                        onClick={() => {
+                          setEditingAppointment(apt);
+                          setIsModalOpen(true);
+                        }}
+                        className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-yellow-600 text-xs"
+                      >
+                        Edit
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                <td colSpan={role === "Doctor" ? 5 : 6} className="px-6 py-4 text-center text-gray-500">
                   No appointments found.
                 </td>
               </tr>
@@ -350,10 +362,9 @@ console.log("hospitalId from useParams:", hospitalId);
             key={date.toISOString()}
             onClick={() => setSelectedDate(date)}
             className={`relative h-16 px-2 py-1 text-sm font-semibold cursor-pointer transition-all duration-200 ease-in-out rounded-lg
-              ${
-                selectedDate && isSameDay(date, selectedDate)
-                  ? "bg-blue-600 text-white shadow-md scale-105"
-                  : "bg-gray-200 text-gray-700 hover:bg-blue-50 shadow-sm hover:shadow-md hover:scale-105"
+              ${selectedDate && isSameDay(date, selectedDate)
+                ? "bg-blue-600 text-white shadow-md scale-105"
+                : "bg-gray-200 text-gray-700 hover:bg-blue-50 shadow-sm hover:shadow-md hover:scale-105"
               }`}
           >
             <span className="absolute top-1 left-2">{format(date, "d")}</span>
@@ -380,6 +391,7 @@ console.log("hospitalId from useParams:", hospitalId);
         </div>
       )}
 
+      {/* Add/Edit Modal */}
       {(isModalOpen || editingAppointment) && (
         <AddAppointmentModal
           onClose={() => {
@@ -394,7 +406,6 @@ console.log("hospitalId from useParams:", hospitalId);
           token={token}
         />
       )}
-
     </div>
   );
 }

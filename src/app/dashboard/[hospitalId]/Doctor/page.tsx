@@ -164,6 +164,7 @@ export default function DoctorsPage() {
         </div>
 
         <select
+         title="speciality"
           name="specialty"
           value={selectedSpecialty}
           onChange={(e) => setSelectedSpecialty(e.target.value)}
@@ -211,6 +212,7 @@ export default function DoctorsPage() {
     isOpen={!!deleteDoctorId}
     onClose={() => setDeleteDoctorId(null)}
     onConfirm={() => handleDelete(deleteDoctorId!)}
+     itemName="this doctor"
   />
 
 

@@ -5,10 +5,12 @@ export default function DeleteModal({
   isOpen,
   onClose,
   onConfirm,
+  itemName = "this item",  // 👈 default text agar kuch pass na karo
 }: {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  itemName?: string;
 }) {
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
@@ -20,7 +22,7 @@ export default function DeleteModal({
         <Dialog.Panel className="bg-white rounded-lg p-6 shadow-lg max-w-sm w-full">
           <Dialog.Title className="text-lg font-semibold">Confirm Delete</Dialog.Title>
           <p className="text-sm text-gray-600 mt-2">
-            Are you sure you want to delete this user?
+            Are you sure you want to delete {itemName}?
           </p>
 
           <div className="flex justify-end gap-3 mt-6">

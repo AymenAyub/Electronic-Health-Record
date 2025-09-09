@@ -266,6 +266,7 @@ export default function StaffPage() {
         isOpen={!!deleteStaffId}
         onClose={() => setDeleteStaffId(null)}
         onConfirm={() => handleDelete(deleteStaffId!)}
+         itemName="this staff member"
       />
         </div>
   );
