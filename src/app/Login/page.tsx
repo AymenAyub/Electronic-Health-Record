@@ -4,7 +4,6 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Mail, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { log } from "console";
 
 export default function LoginPage() {
   const [message, setMessage] = useState("");
@@ -49,28 +48,19 @@ export default function LoginPage() {
           localStorage.setItem("token", data.token);
           localStorage.setItem("user", JSON.stringify(data.user));
           localStorage.setItem("hospitals", JSON.stringify(data.hospitals));
-         
-          const defaultHospitalId =
-            data.defaultHospitalId ??
-            data.hospitals?.[0]?.hospital?.id ??
-            null;
+          localStorage.setItem("role", data.defaultRole?.name || data.hospitals?.[0]?.role?.name);
 
-            const hospitalRole = data.hospitals?.[0]?.role;
-            const resolvedRole = hospitalRole ?? data.user?.role ?? null;
-            if (resolvedRole) localStorage.setItem("role", resolvedRole);       
+        
+              const defaultHospitalId =
+                data.defaultHospitalId ??
+                data.hospitals?.[0]?.hospital?.id ??
+                null;
 
-
+             
               if (defaultHospitalId) {
                 localStorage.setItem("lastHospitalId", defaultHospitalId);
                 router.push(`/dashboard/${defaultHospitalId}`);
               }
-          //  else {
-              //   if (data.user?.role === "admin") {
-              //     router.push("/AddHospital");
-              //   } else {
-              //     setMessage("No hospital assigned to this account. Contact admin.");
-              //   }
-              // }
               router.push(`/dashboard/${defaultHospitalId}`);
             }
         

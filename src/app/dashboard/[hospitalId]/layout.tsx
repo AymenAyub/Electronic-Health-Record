@@ -11,7 +11,7 @@ import UserProfileDropdown from "@/app/components/UserProfileDropdown";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [hospitalSubdomain, setHospitalSubdomain] = useState("");
+  // const [hospitalSubdomain, setHospitalSubdomain] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [hospitalName, setHospitalName] = useState<string>("Hospital");
@@ -22,13 +22,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
   const [hospitalDropdownOpen, setHospitalDropdownOpen] = useState(false);
 
-
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams();
-const rawHospitalId = params?.hospitalId;
-const hospitalId = Array.isArray(rawHospitalId) ? rawHospitalId[0] : rawHospitalId;
-
+  const rawHospitalId = params?.hospitalId;
+  const hospitalId = Array.isArray(rawHospitalId) ? rawHospitalId[0] : rawHospitalId;
 
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
@@ -47,11 +45,19 @@ useEffect(() => {
 
   if (storedHospitals?.length > 0) {
     // Normalize hospitals to have `id` field
-    const normalizedHospitals = storedHospitals.map((h: any) => ({
-      id: h.hospital?._id || h.hospital?.id,
-      name: h.hospital?.name,
-      subdomain: h.hospital?.subdomain,
-    }));
+    // const normalizedHospitals = storedHospitals.map((h: any) => ({
+    //   id: h.hospital?._id || h.hospital?.id,
+    //   name: h.hospital?.name,
+    //   subdomain: h.hospital?.subdomain,
+    // }));
+    const normalizedHospitals = storedHospitals
+  .filter((h: any) => h.hospital) 
+  .map((h: any) => ({
+    id: h.hospital._id || h.hospital.id,
+    name: h.hospital.name,
+    subdomain: h.hospital.subdomain,
+  }));
+
 
     setHospitals(normalizedHospitals);
 
@@ -94,20 +100,20 @@ useEffect(() => {
     fetchHospital();
   }, [hospitalId]);
 
-  useEffect(() => {
-    if (!hospitalId) return;
-    fetch(`http://localhost:5000/api/hospital/${hospitalId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.hospital?.subdomain) setHospitalSubdomain(data.hospital.subdomain);
-      })
-      .catch((err) => console.error("Failed to fetch hospital domain:", err));
-  }, [hospitalId]);
+  // useEffect(() => {
+  //   if (!hospitalId) return;
+  //   fetch(`http://localhost:5000/api/hospital/${hospitalId}`, {
+  //     headers: { Authorization: `Bearer ${token}` },
+  //   })
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       if (data?.hospital?.subdomain) setHospitalSubdomain(data.hospital.subdomain);
+  //     })
+  //     .catch((err) => console.error("Failed to fetch hospital domain:", err));
+  // }, [hospitalId]);
 
   useEffect(() => {
-    if (role !== "admin" || !token) return;
+    if (role !== "Owner" || !token) return;
     const fetchHospitals = async () => {
       try {
         const res = await fetch("http://localhost:5000/api/hospital", {
@@ -124,6 +130,7 @@ useEffect(() => {
   }, [role, token]);
 
   useEffect(() => {
+  
   if (!hospitalId || hospitals.length === 0) return;
 
   const found = hospitals.find((h) => h.id === hospitalId);
@@ -133,17 +140,18 @@ useEffect(() => {
 }, [hospitalId, hospitals]);
 
   const menuConfig: Record<string, any[]> = {
-    admin: [
+    Owner: [
       { key: "dashboard", label: "Dashboard", icon: <Home size={20} />, path: `/dashboard/${hospitalId}` },
+      { key: "roleManagement", label: "Role Management", icon: <UserPlus size={20} />, path: `/dashboard/${hospitalId}/RoleManagement` },
+      { key: "userManagement", label: "User Management", icon: <User size={20} />, path: `/dashboard/${hospitalId}/UserManagement` },
       { key: "doctors", label: "Doctors", icon: <UserPlus size={20} />, path: `/dashboard/${hospitalId}/Doctor` },
       { key: "staff", label: "Staff", icon: <Users size={20} />, path: `/dashboard/${hospitalId}/Staff` },
       { key: "patients", label: "Patients", icon: <User size={20} />, path: `/dashboard/${hospitalId}/Patients` },
       { key: "appointments", label: "Appointments", icon: <CalendarCheck size={20} />, path: `/dashboard/${hospitalId}/Appointments` },
       { key: "payments", label: "Payments & Billing", icon: <CreditCard size={20} />, path: `/dashboard/${hospitalId}/Payments` },
-      // { key: "reports", label: "Reports & Analytics", icon: <BarChart2 size={20} />, path: `/dashboard/${hospitalId}/Reports` },
       { key: "settings", label: "Settings", icon: <Settings size={20} />, path: `/dashboard/${hospitalId}/Settings` },
     ],
-    doctor: [
+    Doctor: [
       { key: "dashboard", label: "Dashboard", icon: <Home size={20} />, path: `/dashboard/${hospitalId}` },
       { key: "availability", label: "My Availability", icon: <Clock size={20} />, path: `/dashboard/${hospitalId}/availability` },
       { key: "appointments", label: "Appointments", icon: <CalendarCheck size={20} />, path: `/dashboard/${hospitalId}/Appointments` },
@@ -159,7 +167,21 @@ useEffect(() => {
     ],
   };
 
-  const menuItems = role ? menuConfig[role] || [] : [];
+    let menuItems: any[] = [];
+
+      console.log('length',hospitals.length);
+
+
+    if (role === "Owner") {
+      if (hospitals.length === 0) {
+        menuItems = [];
+      } else {
+        menuItems = menuConfig["Owner"] || [];
+      }
+    } else if (role) {
+      menuItems = menuConfig[role] || [];
+    }
+
   const filteredItems = menuItems.filter((item) =>
     item.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -188,7 +210,7 @@ useEffect(() => {
           {hospitals.length !== 0 && (
              <>
           <nav className="flex flex-col text-[15px] font-semibold mt-2">
-           <a
+           {/* <a
             onClick={() => {
               if (!hospitalSubdomain) return alert("Hospital not found");
               window.location.href = `http://localhost:3000/hospital/${hospitalSubdomain}`;
@@ -197,9 +219,9 @@ useEffect(() => {
           >
             <Building2 size={20} />
             {sidebarOpen && <span>Homepage</span>}
-          </a>
+          </a> */}
 
-          {role === "admin" && hospitals.length !== 0 && (
+          {role === "Owner" && hospitals.length !== 0 && (
             <a
               onClick={() => router.push("/AddHospital")}
               className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-blue-100"
@@ -216,7 +238,7 @@ useEffect(() => {
  )}
 
       <nav className="flex flex-col flex-grow text-[15px] font-semibold">
-        {role === "admin" && hospitals.length === 0 ? (
+        {role === "Owner" && hospitals.length === 0 ? (
           <>
             <a
               onClick={() => router.push("/AddHospital")}
@@ -297,7 +319,7 @@ useEffect(() => {
           )}
 
           <div className="flex items-center gap-4">
-        {role === "admin" && hospitals.length > 0 && (
+        {role === "Owner" && hospitals.length > 0 && (
       <div className="relative">
           <button
             onClick={() => setHospitalDropdownOpen(!hospitalDropdownOpen)}

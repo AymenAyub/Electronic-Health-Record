@@ -210,6 +210,9 @@ export default function DashboardPage() {
     setHospitals(storedHospitals);
   }, []);
 
+  console.log(hospitals);
+  
+
   useEffect(() => {
     if (!hospitalId || !token || hospitals.length === 0) return;
 
@@ -269,6 +272,8 @@ export default function DashboardPage() {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
+  console.log('hos length',hospitals.length);
+  
   // Show Add Hospital prompt if no hospitals
   if (hospitals.length === 0) {
     return (
@@ -293,7 +298,7 @@ export default function DashboardPage() {
 
   // Role-based dashboard config
   const dashboardConfig: Record<string, any[]> = {
-    admin: [
+    Owner: [
       { label: "Active Doctors", value: stats.activeDoctors, icon: <Stethoscope className="text-blue-500" size={28} /> },
       { label: "Registered Staff", value: stats.registeredStaff, icon: <User className="text-purple-500" size={28} /> },
       { label: "Total Patients", value: stats.totalPatients, icon: <User className="text-green-500" size={28} /> },
@@ -343,8 +348,8 @@ export default function DashboardPage() {
       </div>
 
             {/* Quick Action Buttons */}
-        <div className="flex flex-wrap gap-4 mb-8">
-          {role === "admin" && (
+        {/* <div className="flex flex-wrap gap-4 mb-8">
+          {role === "Owner" && (
             <>
               <button
                 onClick={() => router.push(`/dashboard/${hospitalId}/Patients`)}
@@ -398,9 +403,9 @@ export default function DashboardPage() {
               </button>
             </>
           )}
-        </div>
+        </div> */}
 
-      {/* Charts Section */}
+    
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Line Chart */}
         <div className="bg-white p-6 rounded-xl shadow-md">

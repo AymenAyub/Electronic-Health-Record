@@ -193,7 +193,7 @@ export default function AppointmentsPage() {
               ? "Your Appointments"
               : role === "staff"
               ? "Schedule Appointments"
-              : role === "admin"
+              : role === "Owner"
               ? "Manage Appointments"
               : "Appointments"}
           </h1>
@@ -203,7 +203,7 @@ export default function AppointmentsPage() {
               ? "View all your upcoming appointments"
               : role === "staff"
               ? "Add and manage appointments for your hospital"
-              : role === "admin"
+              : role === "Owner"
               ? "Overview and control of all hospital appointments"
               : ""}
           </p>
@@ -212,7 +212,7 @@ export default function AppointmentsPage() {
         </div>
 
         {/* Add Appointment button → Admin & Staff only */}
-        {(role === "admin" || role === "staff") && (
+        {(role === "Owner" || role === "staff") && (
           <button
             onClick={() => setIsModalOpen(true)}
             className="bg-blue-600 text-white px-5 py-3 rounded-xl hover:bg-blue-700 transition-all duration-200 flex items-center gap-2 font-semibold"
@@ -284,7 +284,7 @@ export default function AppointmentsPage() {
                 {(role === "admin" || role === "staff") && (
               <th className="px-6 py-3">Actions</th>)}
 
-              {(role === "Admin" || role === "Staff") && <th className="px-6 py-3">Actions</th>}
+              {(role === "Owner" || role === "Staff") && <th className="px-6 py-3">Actions</th>}
             </tr>
           </thead>
           <tbody>

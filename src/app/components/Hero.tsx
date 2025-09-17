@@ -19,7 +19,7 @@ export default function Hero() {
 
           <div className="flex justify-center lg:justify-start">
             <a
-              href="#"
+              href="/signup"
               className="px-6 py-3 rounded-lg shadow text-white bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-600 hover:to-blue-700 transition"
             >
               Join Now
