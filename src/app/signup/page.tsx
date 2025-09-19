@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { User, Mail, Phone,Lock, Contact } from "lucide-react";
+import { User, Mail, Phone,Lock, Contact, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function Signup() {
@@ -16,6 +16,7 @@ export default function Signup() {
   });
 
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false); 
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -27,6 +28,7 @@ export default function Signup() {
     e.preventDefault();
 
     try {
+      setLoading(true);
       const res = await fetch(`http://localhost:5000/api/signup`, {
         method: "POST",
         headers: {
@@ -47,6 +49,9 @@ export default function Signup() {
       }
     } catch (err) {
       setMessage("Something went wrong");
+    }
+    finally {
+      setLoading(false); 
     }
     
   };
@@ -161,7 +166,14 @@ export default function Signup() {
               type="submit"
               className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow transition duration-300 hover:shadow-purple-500/30 text-sm"
             >
-              Sign Up
+               {loading ? (
+                <>
+                  <Loader2 className="animate-spin mr-2" size={18} />
+                 Creating Your Account
+                </>
+              ) : (
+                "Sign Up"
+              )}
             </button>
           </form>
 

@@ -347,64 +347,6 @@ export default function DashboardPage() {
         ))}
       </div>
 
-            {/* Quick Action Buttons */}
-        {/* <div className="flex flex-wrap gap-4 mb-8">
-          {role === "Owner" && (
-            <>
-              <button
-                onClick={() => router.push(`/dashboard/${hospitalId}/Patients`)}
-                className="flex items-center gap-2 bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 text-white px-6 py-3 rounded-lg shadow transition"
-              >
-                <PlusCircle size={20} /> Add Patient
-              </button>
-              <button
-                onClick={() => router.push(`/dashboard/${hospitalId}/Doctor`)}
-                className="flex items-center gap-2 bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 text-white px-6 py-3 rounded-lg shadow transition"
-              >
-                <User size={20} /> Add Doctor
-              </button>
-              <button
-                onClick={() => router.push(`/dashboard/${hospitalId}/Staff`)}
-                className="flex items-center gap-2 bg-purple-500 hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400 text-white px-6 py-3 rounded-lg shadow transition"
-              >
-                <User size={20} /> Add Staff
-              </button>
-              <button
-                onClick={() => router.push(`/dashboard/${hospitalId}/Appointments`)}
-                className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 text-white px-6 py-3 rounded-lg shadow transition"
-              >
-                <CalendarCheck size={20} /> Add Appointment
-              </button>
-            </>
-          )}
-
-          {role === "doctor" && (
-            <button
-              onClick={() => router.push(`/dashboard/${hospitalId}/Appointments`)}
-              className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 text-white px-6 py-3 rounded-lg shadow transition"
-            >
-              <CalendarCheck size={20} /> View Appointments
-            </button>
-          )}
-
-          {role === "staff" && (
-            <>
-              <button
-                onClick={() => router.push(`/dashboard/${hospitalId}/Patients`)}
-                className="flex items-center gap-2 bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 text-white px-6 py-3 rounded-lg shadow transition"
-              >
-                <PlusCircle size={20} /> Add Patient
-              </button>
-              <button
-                onClick={() => router.push(`/dashboard/${hospitalId}/Appointments`)}
-                className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 text-white px-6 py-3 rounded-lg shadow transition"
-              >
-                <CalendarCheck size={20} /> Add Appointment
-              </button>
-            </>
-          )}
-        </div> */}
-
     
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Line Chart */}
