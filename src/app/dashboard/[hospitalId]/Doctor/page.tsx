@@ -60,7 +60,7 @@ export default function DoctorsPage() {
   const handleDelete = async (id: string) => {
   
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/deleteUser/${id}?hospital_id=${hospitalId}`, {
+      const res = await fetch(`http://localhost:5000/api/admin/deleteUser/${id}?hospitalId=${hospitalId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -87,7 +87,7 @@ export default function DoctorsPage() {
   const handleSaveDoctor = async (doctorData: any) => {
     try {
       const url = editingDoctor
-        ? `http://localhost:5000/api/admin/updateUser/${editingDoctor.user_id}`
+        ? `http://localhost:5000/api/updateUser/${editingDoctor.user_id}?hospitalId=${hospitalId}`
         : "http://localhost:5000/api/admin/addDoctor";
   
       const method = editingDoctor ? "PUT" : "POST";
@@ -148,7 +148,6 @@ export default function DoctorsPage() {
             </button>
             </div>
 
-      {/* Search & Filter */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="flex-grow relative">
           <input
@@ -179,8 +178,7 @@ export default function DoctorsPage() {
         </select>
       </div>
 
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {filteredDoctors.length > 0 ? (
           filteredDoctors.map((doctor) => (
             <DoctorCard 
@@ -204,19 +202,14 @@ export default function DoctorsPage() {
     doctor={editingDoctor}
     onSave={handleSaveDoctor}
   />
+  )}
 
-
-  
-)}
 <DeleteModal
     isOpen={!!deleteDoctorId}
     onClose={() => setDeleteDoctorId(null)}
     onConfirm={() => handleDelete(deleteDoctorId!)}
      itemName="this doctor"
   />
-
-
-
     </div>
   );
 }

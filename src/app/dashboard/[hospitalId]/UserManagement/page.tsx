@@ -150,7 +150,7 @@ export default function UserManagement() {
 
       if (editingUser) {
         await fetchWithAuth(
-          `http://localhost:5000/api/updateUser/${editingUser.id}?hospital_id=${hospitalId}`,
+          `http://localhost:5000/api/updateUser/${editingUser.id}?hospitalId=${hospitalId}`,
           {
             method: "PUT",
             body: JSON.stringify(payload),
@@ -247,7 +247,7 @@ export default function UserManagement() {
 
       <Card>
         <CardHeader className="flex items-center justify-between">
-          <CardTitle className="text-blue-600">User Management</CardTitle>
+          <CardTitle className="text-blue-600">Users</CardTitle>
           <Button
             onClick={() => {
               setEditingUser(null);

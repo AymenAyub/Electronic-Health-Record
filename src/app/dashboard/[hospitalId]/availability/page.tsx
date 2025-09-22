@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Clock, Calendar, Pen, Trash2 } from "lucide-react";
+import DeleteModal from "@/app/components/Admin/DeleteModal";
 
-// Better: store day as number (DB compatible)
 const daysOfWeek = [
   { label: "Sunday", value: 0 },
   { label: "Monday", value: 1 },
@@ -20,13 +20,16 @@ export default function DoctorAvailability() {
     { id?: number; day: number; startTime: string; endTime: string; slotDuration: number }[]
   >([]);
   const [currentSlot, setCurrentSlot] = useState({
-    day: 1, // Monday default
+    day: 1, 
     startTime: "",
     endTime: "",
     slotDuration: 30,
   });
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+
   const params = useParams();
   const hospitalId = params?.hospitalId;
   const [message, setMessage] = useState("");
@@ -35,7 +38,7 @@ export default function DoctorAvailability() {
     const fetchAvailability = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("http://localhost:5000/api/getMyAvailability", {
+        const res = await fetch(`http://localhost:5000/api/getMyAvailability?hospitalId=${hospitalId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -64,67 +67,11 @@ export default function DoctorAvailability() {
     fetchAvailability();
   }, []);
 
-  // const handleSaveAvailability = async () => {
-  //   try {
-  //     const token = localStorage.getItem("token");
-
-  //     const url =
-  //       editIndex !== null
-  //         ? `http://localhost:5000/api/updateAvailability/${slots[editIndex].id}`
-  //         : "http://localhost:5000/api/addAvailability";
-
-  //     const method = editIndex !== null ? "PUT" : "POST";
-
-  //     const res = await fetch(url, {
-  //       method,
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //       body: JSON.stringify({
-  //         day_of_week: currentSlot.day,
-  //         start_time: currentSlot.startTime,
-  //         end_time: currentSlot.endTime,
-  //         slot_duration: currentSlot.slotDuration,
-  //         hospital_id: hospitalId,
-  //       }),
-  //     });
-
-  //     const data = await res.json();
-
-  //     if (res.ok) {
-  //       if (editIndex !== null) {
-  //         setSlots((prev) =>
-  //           prev.map((s, idx) => (idx === editIndex ? { ...s, ...currentSlot } : s))
-  //         );
-  //         setMessage("Availability updated successfully");
-  //       } else {
-  //         setSlots((prev) => [
-  //           ...prev,
-  //           { ...currentSlot, id: data.availability.availability_id },
-  //         ]);
-  //         setMessage("Availability added successfully");
-  //       }
-
-  //       setEditIndex(null);
-  //       setCurrentSlot({ day: 1, startTime: "", endTime: "", slotDuration: 30 });
-  //     } else {
-  //       setMessage(data.message || "Failed to save availability");
-  //     }
-
-  //     setTimeout(() => setMessage(""), 3000);
-  //   } catch (err) {
-  //     console.error(err);
-  //     setMessage("Error saving availability");
-  //     setTimeout(() => setMessage(""), 3000);
-  //   }
-  // };
-
   const handleSaveAvailability = async () => {
     try {
       const token = localStorage.getItem("token");
   
-      const url = "http://localhost:5000/api/addAvailability"; // Always POST
+      const url = `http://localhost:5000/api/addAvailability?hospitalId=${hospitalId}`; // Always POST
   
       const res = await fetch(url, {
         method: "POST",
@@ -144,11 +91,10 @@ export default function DoctorAvailability() {
       const data = await res.json();
   
       if (res.ok) {
-        // If exists, replace it in slots array
         setSlots((prev) => {
           const index = prev.findIndex((s) => s.day === currentSlot.day);
           if (index !== -1) {
-            // Replace existing
+      
             prev[index] = {
               ...prev[index],
               ...currentSlot,
@@ -156,7 +102,7 @@ export default function DoctorAvailability() {
             };
             return [...prev];
           } else {
-            // Add new
+          
             return [...prev, { ...currentSlot, id: data.availability.availability_id }];
           }
         });
@@ -179,6 +125,11 @@ export default function DoctorAvailability() {
     setCurrentSlot(slots[index]);
     setEditIndex(index);
   };
+
+  const handleDeleteClick = (index: number) => {
+  setDeleteIndex(index);
+  setIsDeleteModalOpen(true);
+};
 
   const handleDelete = async (index: number) => {
     try {
@@ -231,10 +182,8 @@ export default function DoctorAvailability() {
         </div>
       )}
 
-      {/* Form */}
       <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4 items-end">
-          {/* Day */}
           <div>
             <label className="block text-sm font-semibold text-gray-600 mb-1">
               Day
@@ -255,7 +204,7 @@ export default function DoctorAvailability() {
             </select>
           </div>
 
-          {/* Start Time */}
+        
           <div>
             <label className="block text-sm font-semibold text-gray-600 mb-1">
               Start Time
@@ -271,7 +220,7 @@ export default function DoctorAvailability() {
             />
           </div>
 
-          {/* End Time */}
+          
           <div>
             <label className="block text-sm font-semibold text-gray-600 mb-1">
               End Time
@@ -287,7 +236,7 @@ export default function DoctorAvailability() {
             />
           </div>
 
-          {/* Slot Duration */}
+         
           <div>
             <label className="block text-sm font-semibold text-gray-600 mb-1">
               Slot Duration (mins)
@@ -320,7 +269,7 @@ export default function DoctorAvailability() {
         </button>
       </div>
 
-      {/* Slots Table */}
+      
       <div className="overflow-x-auto bg-white rounded-lg">
         <h2 className="text-xl font-bold text-blue-600 mb-4 flex items-center gap-2 p-4">
           <Clock size={20} /> Your Availability
@@ -373,16 +322,17 @@ export default function DoctorAvailability() {
 
                       <div className="relative">
                         <button
-                          onClick={() => handleDelete(idx)}
-                          onMouseEnter={() => setHoveredIcon(`delete-${idx}`)}
-                          onMouseLeave={() => setHoveredIcon(null)}
-                          className="p-1 rounded-full hover:bg-gray-100"
-                        >
-                          <Trash2 size={18} className="text-red-600" />
-                        </button>
+                            onClick={() => handleDeleteClick(idx)}
+                            onMouseEnter={() => setHoveredIcon(`delete-${idx}`)}
+                            onMouseLeave={() => setHoveredIcon(null)}
+                            className="p-1 rounded-full hover:bg-gray-100"
+                          >
+                            <Trash2 size={18} className="text-red-600" />
+                          </button>
+
                         {hoveredIcon === `delete-${idx}` && (
                           <div className="absolute -top-7 left-0 bg-gray-700 text-white text-xs px-2 py-1 rounded-md shadow-lg">
-                            Delete
+                            Delete 
                           </div>
                         )}
                       </div>
@@ -394,6 +344,24 @@ export default function DoctorAvailability() {
           </div>
         )}
       </div>
+
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+         onConfirm={() => {
+          if (deleteIndex !== null) {
+            handleDelete(deleteIndex);
+            setDeleteIndex(null);
+          }
+          setIsDeleteModalOpen(false);
+        }}
+        itemName={
+          deleteIndex !== null
+            ? `${daysOfWeek.find(d => d.value === slots[deleteIndex].day)?.label} slot`
+            : "this slot"
+        }
+      />
+
     </div>
   );
 }

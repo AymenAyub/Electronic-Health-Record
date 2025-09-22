@@ -5,6 +5,7 @@ import { Pen, Trash2, UserPlus, User, Search } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import AddPatientModal from "@/app/components/AddPatientModal"; 
 import DeleteModal from "@/app/components/Admin/DeleteModal";
+import toast from "react-hot-toast";
 
 export default function PatientsPage() {
   const [patients, setPatients] = useState<any[]>([]);
@@ -35,15 +36,16 @@ export default function PatientsPage() {
  
   const fetchPatients = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/getPatients?hospital_id=${hospitalId}`, {
+      const res = await fetch(`http://localhost:5000/api/getPatients?hospitalId=${hospitalId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       if (res.ok) setPatients(data.patients);
-      else alert(data.message || "Failed to fetch patients");
+      else 
+        toast.error(data.message || "Failed to fetch patients");
     } catch (err) {
       console.error(err);
-      alert("Error fetching patients");
+      toast.error("Error fetching patients");
     }
   };
 
@@ -59,7 +61,7 @@ export default function PatientsPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/patients/deletePatient/${id}?hospital_id=${hospitalId}`, {
+      const res = await fetch(`http://localhost:5000/api/patients/deletePatient/${id}?hospitalId=${hospitalId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -67,15 +69,15 @@ export default function PatientsPage() {
         },
       });
       if (res.ok) {
-        alert("Patient deleted successfully");
+        toast.success("Patient deleted successfully");
         fetchPatients();
       } else {
         const err = await res.json();
-        alert(err.message || "Failed to delete patient");
+        toast.error(err.message || "Failed to delete patient");
       }
     } catch (err) {
       console.error(err);
-      alert("Something went wrong");
+      toast.error("Something went wrong");
     } finally {
       setDeletePatientId(null);
     }
@@ -84,8 +86,8 @@ export default function PatientsPage() {
   const handleSavePatient = async (patientData: any) => {
     try {
       const url = editingPatient
-        ? `http://localhost:5000/api/patients/updatePatient/${editingPatient.patient_id}`
-        : "http://localhost:5000/api/patients/addPatient";
+        ? `http://localhost:5000/api/patients/updatePatient/${editingPatient.patient_id}?hospitalId=${hospitalId}`
+        : `http://localhost:5000/api/patients/addPatient?hospitalId=${hospitalId}`;
       const method = editingPatient ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -102,12 +104,13 @@ export default function PatientsPage() {
         fetchPatients();
         setIsModalOpen(false);
         setEditingPatient(null);
+        toast.success("Patient saved successfully");
       } else {
-        alert(data.message || "Failed to save patient");
+        toast.error(data.message || "Failed to save patient");
       }
     } catch (err) {
       console.error(err);
-      alert("Error saving patient");
+      toast.error("Error saving patient");
     }
   };
 
@@ -124,9 +127,14 @@ export default function PatientsPage() {
       <div className="flex justify-between items-center mb-6">
       <div className="flex items-center gap-2 mb-3 md:mb-0">
     <User size={28} className="text-blue-600" />
-    <h1 className="text-3xl md:text-3xl font-bold text-blue-600 tracking-tight">
-      Manage Patients 
-    </h1>
+    <div className="flex flex-col gap-1">
+            <h1 className="text-3xl md:text-3xl font-bold text-blue-600 tracking-tight">
+              Manage Patients
+            </h1>
+            <p className="text-sm text-gray-500">
+              Overview and manage all hospital's patients
+            </p>
+          </div>
   </div>
   
         <button

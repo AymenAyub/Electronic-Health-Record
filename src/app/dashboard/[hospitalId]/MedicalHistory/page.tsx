@@ -18,7 +18,7 @@ export default function MedicalHistoryPage() {
   const fetchPatients = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/getDoctorPatients?hospital_id=${hospitalId}`,
+        `http://localhost:5000/api/getDoctorPatients?hospitalId=${hospitalId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();

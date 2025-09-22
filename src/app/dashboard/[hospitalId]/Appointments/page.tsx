@@ -5,6 +5,7 @@ import { format, isSameDay, isThisWeek, isThisMonth } from "date-fns";
 import { UserPlus, Calendar, Search, ArrowLeft, ArrowRight } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import AddAppointmentModal from "@/app/components/AddAppointmentModal";
+import toast from "react-hot-toast";
 
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<any[]>([]);
@@ -23,7 +24,7 @@ export default function AppointmentsPage() {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
   const userStr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
   const user = userStr ? JSON.parse(userStr) : null;
-  const role = user?.role; // "Admin", "Staff", "Doctor"
+  const role = localStorage.getItem("role"); 
 
   const router = useRouter();
   const params = useParams();
@@ -31,15 +32,13 @@ export default function AppointmentsPage() {
 
   console.log('role', role);
   
-
-  // Fetch appointments role-based
   const fetchAppointments = async () => {
     try {
       let url = "";
       if (role === "doctor") {
         url = "http://localhost:5000/api/getDoctorAppointments"; // only their appointments
       } else {
-        url = `http://localhost:5000/api/appointments?hospital_id=${hospitalId}`;
+        url = `http://localhost:5000/api/appointments?hospitalId=${hospitalId}`;
       }
 
       const res = await fetch(url, {
@@ -55,43 +54,42 @@ export default function AppointmentsPage() {
           }))
         );
       } else {
-        alert(data.message || "Failed to fetch appointments");
+        toast.error(data.message || "Failed to fetch appointments");
       }
     } catch (err) {
       console.error(err);
-      alert("Error fetching appointments");
+       toast.error("Error fetching appointments");
     }
   };
 
-  // Fetch patients (Admin & Staff)
   const fetchPatients = async () => {
-    if (role === "doctor") return;
+    if (role === "Doctor") return;
     try {
-      const res = await fetch(`http://localhost:5000/api/getPatients?hospital_id=${hospitalId}`, {
+      const res = await fetch(`http://localhost:5000/api/getPatients?hospitalId=${hospitalId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       if (res.ok) setPatients(data.patients);
-      else alert(data.message || "Failed to fetch patients");
+      else  
+        toast.error(data.message || "Failed to fetch patients");
     } catch (err) {
       console.error(err);
-      alert("Error fetching patients");
+       toast.error("Error fetching patients");
     }
   };
 
-  // Fetch doctors (Admin & Staff)
   const fetchDoctors = async () => {
     if (role === "doctor") return;
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/getDoctors?hospital_id=${hospitalId}`, {
+      const res = await fetch(`http://localhost:5000/api/getDoctors?hospitalId=${hospitalId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       if (res.ok) setDoctors(data.doctors);
-      else alert(data.message || "Failed to fetch doctors");
+      else  toast.error(data.message || "Failed to fetch doctors");
     } catch (err) {
       console.error(err);
-      alert("Error fetching doctors");
+       toast.error("Error fetching doctors");
     }
   };
 
@@ -117,8 +115,8 @@ export default function AppointmentsPage() {
   const handleSaveAppointment = async (appointmentData: any) => {
     try {
       const url = editingAppointment
-        ? `http://localhost:5000/api/updateAppointment/${editingAppointment.id}`
-        : "http://localhost:5000/api/scheduleAppointment";
+        ? `http://localhost:5000/api/updateAppointment/${editingAppointment.id}?hospitalId=${hospitalId}`
+        : "http://localhost:5000/api/scheduleAppointment?hospitalId=${hospitalId}";
       const method = editingAppointment ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -135,16 +133,16 @@ export default function AppointmentsPage() {
         fetchAppointments();
         setIsModalOpen(false);
         setEditingAppointment(null);
+        toast.success(data.message || "Appointment save successfullly");
       } else {
-        alert(data.message || "Failed to save appointment");
+         toast.error(data.message || "Failed to save appointment");
       }
     } catch (err) {
       console.error(err);
-      alert("Error saving appointment");
+       toast.error("Error saving appointment");
     }
   };
 
-  // Filter appointments
   const filteredAppointments = appointments
     .map((a) => ({ ...a, appointment_date: new Date(a.appointment_date) }))
     .filter((apt) => {
@@ -211,7 +209,6 @@ export default function AppointmentsPage() {
 
         </div>
 
-        {/* Add Appointment button → Admin & Staff only */}
         {(role === "Owner" || role === "staff") && (
           <button
             onClick={() => setIsModalOpen(true)}
@@ -307,7 +304,7 @@ export default function AppointmentsPage() {
                     </span>
                   </td>
 
-                  {(role === "admin" || role === "staff") && (
+                  {(role === "Admin" || role === "Owner") && (
                     <td className="px-6 py-3 flex gap-2">
                       <button
                         onClick={() => {

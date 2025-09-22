@@ -286,6 +286,14 @@ export default function AddUserModal({
           </div>
 
           <div className="space-y-2">
+              <Label>Bio</Label>
+              <Input
+                value={formData.bio}
+                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+              />
+            </div>
+
+          <div className="space-y-2">
             <Label>Role</Label>
             <Select
               value={formData.roleId}
@@ -328,15 +336,7 @@ export default function AddUserModal({
             </div>
           )}
 
-          {selectedRole?.name === "Admin" && (
-            <div className="space-y-2">
-              <Label>Bio</Label>
-              <Input
-                value={formData.bio}
-                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-              />
-            </div>
-          )}
+          
         </div>
 
         <DialogFooter>
