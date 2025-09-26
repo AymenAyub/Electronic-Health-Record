@@ -139,13 +139,6 @@ export default function DoctorsPage() {
           Manage Doctors
           </h1>
         </div>
-                  <button
-              onClick={() => setIsModalOpen(true)}
-              className="bg-blue-600 text-white px-5 py-3 rounded-xl hover:bg-blue-700 transition-all duration-200 flex items-center gap-2 font-semibold"
-            >
-              <UserPlus size={20} />
-              Add Doctor
-            </button>
             </div>
 
       <div className="flex flex-col md:flex-row gap-4 mb-6">

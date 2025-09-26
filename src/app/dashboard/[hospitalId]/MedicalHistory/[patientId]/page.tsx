@@ -23,8 +23,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import toast from "react-hot-toast";
 import DeleteModal from "@/app/components/Admin/DeleteModal";
-
-
 import AddHistoryModal from "@/app/components/AddHistoryModal";
 
 export default function PatientProfilePage() {
@@ -40,15 +38,14 @@ export default function PatientProfilePage() {
   const [editingHistory, setEditingHistory] = useState<any>(null);
   const [deleteHistory, setDeleteHistory] = useState<string | null>(null);
 
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
+  // Fetch patient info
   useEffect(() => {
     const fetchPatient = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/getDoctorPatients?hospital_id=${hospitalId}`,
+          `http://localhost:5000/api/getDoctorPatients?hospitalId=${hospitalId}`,
           {
             method: "GET",
             headers: {
@@ -77,15 +74,14 @@ export default function PatientProfilePage() {
       }
     };
 
-    if (hospitalId && patientId) {
-      fetchPatient();
-    }
+    if (hospitalId && patientId) fetchPatient();
   }, [hospitalId, patientId, token]);
 
+  // Fetch medical history
   const fetchHistory = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/${patientId}?hospital_id=${hospitalId}`,
+        `http://localhost:5000/api/${patientId}?hospitalId=${hospitalId}`,
         {
           method: "GET",
           headers: {
@@ -96,7 +92,8 @@ export default function PatientProfilePage() {
 
       const data = await res.json();
       if (res.ok) {
-        setHistory(data.history || []);
+        // Ensure only valid objects with history_id
+        setHistory(Array.isArray(data.history) ? data.history.filter(Boolean) : []);
       } else {
         console.error("Error fetching history:", data.message);
       }
@@ -106,17 +103,15 @@ export default function PatientProfilePage() {
   };
 
   useEffect(() => {
-    if (hospitalId && patientId) {
-      fetchHistory();
-    }
+    if (hospitalId && patientId) fetchHistory();
   }, [hospitalId, patientId, token]);
 
+  // Add or update history
   const handleSaveHistory = async (formData: any) => {
     try {
-
       const url = editingHistory
-        ? `http://localhost:5000/api/updateHistory/${editingHistory.history_id}`
-        : "http://localhost:5000/api/createHistory";
+        ? `http://localhost:5000/api/updateHistory/${editingHistory.history_id}?hospitalId=${hospitalId}`
+        : `http://localhost:5000/api/createHistory?hospitalId=${hospitalId}`;
       const method = editingHistory ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -134,26 +129,24 @@ export default function PatientProfilePage() {
 
       const data = await res.json();
       if (res.ok) {
-         if (editingHistory) {
-    
+        if (editingHistory) {
           setHistory((prev) =>
             prev.map((item) =>
-              item.history_id === data.history.history_id ? data.history : item
+              item.history_id === data.history?.history_id ? data.history : item
             )
           );
-            toast.success("Medical history updated");
+          toast.success("Medical history updated");
         } else {
-          
-          setHistory((prev) => [data.history, ...prev]);
+          if (data.history?.history_id) {
+            setHistory((prev) => [data.history, ...prev]);
+          }
           toast.success("Medical history added");
         }
+        await fetchHistory();
         setIsModalOpen(false);
         setEditingHistory(null);
-        
-   
       } else {
-        alert(data.message || "Failed to add history");
-       toast.error(data.message || "Failed to save history");
+        toast.error(data.message || "Failed to save history");
       }
     } catch (err) {
       console.error("Error adding history:", err);
@@ -161,12 +154,11 @@ export default function PatientProfilePage() {
     }
   };
 
-
-    const handleDeleteHistory = async (historyId: string) => {
-
+  // Delete history
+  const handleDeleteHistory = async (historyId: string) => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/${historyId}?hospital_id=${hospitalId}`,
+        `http://localhost:5000/api/${historyId}?hospitalId=${hospitalId}`,
         {
           method: "DELETE",
           headers: {
@@ -174,9 +166,10 @@ export default function PatientProfilePage() {
           },
         }
       );
+
       const data = await res.json();
       if (res.ok) {
-        setHistory((prev) => prev.filter((h) => h.history_id !== historyId));
+        setHistory((prev) => prev.filter((h) => h?.history_id !== historyId));
         fetchHistory();
         toast.success("History deleted");
       } else {
@@ -234,14 +227,14 @@ export default function PatientProfilePage() {
             <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center text-3xl font-bold text-blue-700">
               <User size={40} />
             </div>
-            <h2 className="mt-4 text-xl font-semibold">{patient.name}</h2>
+            <h2 className="mt-4 text-xl font-semibold">{patient?.name}</h2>
             <p className="text-gray-600">
-              {patient.age} yrs | {patient.gender}
+              {patient?.age} yrs | {patient?.gender}
             </p>
             <p className="text-gray-600 flex items-center gap-2">
-              <Phone size={16} /> {patient.contact}
+              <Phone size={16} /> {patient?.contact}
             </p>
-            {patient.bloodGroup && (
+            {patient?.bloodGroup && (
               <p className="text-gray-600 flex items-center gap-2">
                 <Droplet size={16} /> {patient.bloodGroup}
               </p>
@@ -249,6 +242,7 @@ export default function PatientProfilePage() {
           </div>
         </div>
 
+        {/* Medical History */}
         <div className="md:col-span-2">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
@@ -264,14 +258,14 @@ export default function PatientProfilePage() {
 
           {/* Timeline */}
           <div className="relative border-l-2 border-blue-200 ml-4 space-y-6">
-            {history.map((h) => (
-              <div key={h.history_id} className="relative pl-8">
+            {history.filter(Boolean).map((h) => (
+              <div key={h.history_id || Math.random()} className="relative pl-8">
                 <div className="absolute left-[-9px] top-1 w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow" />
                 <div className="bg-white shadow-md rounded-lg p-4">
                   <div className="flex justify-between items-start">
                     <div>
-                     <p className="text-sm text-gray-500">
-                        {h.createdAt
+                      <p className="text-sm text-gray-500">
+                        {h?.createdAt
                           ? new Date(h.createdAt).toLocaleDateString("en-US", {
                               month: "short",
                               day: "numeric",
@@ -279,12 +273,11 @@ export default function PatientProfilePage() {
                             })
                           : "No date"}
                       </p>
-
                       <h3 className="text-lg font-semibold text-blue-700">
-                        {h.diagnosis}
+                        {h?.diagnosis || "No diagnosis"}
                       </h3>
                     </div>
-                  
+
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button className="text-gray-500 hover:text-gray-800">
@@ -294,33 +287,28 @@ export default function PatientProfilePage() {
                       <DropdownMenuContent align="end" className="w-32">
                         <DropdownMenuItem
                           onClick={() => {
-                            setEditingHistory(h); 
-                            setIsModalOpen(true); 
-                          }}>
+                            setEditingHistory(h);
+                            setIsModalOpen(true);
+                          }}
+                        >
                           <Pen size={20} /> Edit
                         </DropdownMenuItem>
 
                         <DropdownMenuItem
                           className="text-red-600"
-                          onClick={()=>{
-                            setDeleteHistory(h.history_id);
-
-
-                          }}
-                          
+                          onClick={() => h?.history_id && setDeleteHistory(h.history_id)}
                         >
-                          <Trash2 size={20}/> Delete
+                          <Trash2 size={20} /> Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-
                   </div>
                   <div className="mt-2 text-gray-700 space-y-1">
                     <p>
-                      <strong>Past Illnesses:</strong> {h.past_illnesses}
+                      <strong>Past Illnesses:</strong> {h?.past_illnesses || "N/A"}
                     </p>
                     <p>
-                      <strong>Prescriptions:</strong> {h.prescriptions}
+                      <strong>Prescriptions:</strong> {h?.prescriptions || "N/A"}
                     </p>
                   </div>
                 </div>
@@ -334,7 +322,7 @@ export default function PatientProfilePage() {
         </div>
       </div>
 
-      {/* Add History Modal */}
+      {/* Modals */}
       {(isModalOpen || editingHistory) && (
         <AddHistoryModal
           onClose={() => {
@@ -345,12 +333,12 @@ export default function PatientProfilePage() {
           onSave={handleSaveHistory}
         />
       )}
-       <DeleteModal
-              isOpen={!!deleteHistory}
-              onClose={() => setDeleteHistory(null)}
-              onConfirm={() => handleDeleteHistory(deleteHistory!)}
-               itemName="this medical history record"
-            />
+      <DeleteModal
+        isOpen={!!deleteHistory}
+        onClose={() => setDeleteHistory(null)}
+        onConfirm={() => deleteHistory && handleDeleteHistory(deleteHistory)}
+        itemName="this medical history record"
+      />
     </div>
   );
 }

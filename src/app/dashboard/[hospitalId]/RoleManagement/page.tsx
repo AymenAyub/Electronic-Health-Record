@@ -46,8 +46,9 @@ export default function RoleManagement() {
   const hospitalId = Array.isArray(rawHospitalId)
     ? rawHospitalId[0]
     : rawHospitalId;
-
-  const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+    
+const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+  try {
     const res = await fetch(url, {
       ...options,
       headers: {
@@ -56,27 +57,32 @@ export default function RoleManagement() {
         ...(options.headers || {}),
       },
     });
+    const data = await res.json().catch(() => null);
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || "API request failed");
+      console.warn(`API failed: ${url}`, data);
+      return null; 
     }
-    return res.json();
-  };
+    return data;
+  } catch (err) {
+    console.error(`Fetch error: ${url}`, err);
+    return null;
+  }
+};
+
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-       
-        const permData = await fetchWithAuth(
-          `http://localhost:5000/api/permissions?hospitalId=${hospitalId}`
-        );
-        setAllPermissions(
-          permData.map((p: any) => ({
-            id: p.permission_id,
-            name: p.name,
-            description: p.description || p.name,
-          }))
-        );
+
+        const permData = await fetchWithAuth(`http://localhost:5000/api/permissions?hospitalId=${hospitalId}`) || [];
+            setAllPermissions(
+              permData.map((p: any) => ({
+                id: p.permission_id,
+                name: p.name,
+                description: p.description || p.name,
+              }))
+            );
+
 
       
         const roleData = await fetchWithAuth(
@@ -100,7 +106,6 @@ export default function RoleManagement() {
           setPermissions(formattedRoles[0].permissions);
           setRoleUsers(formattedRoles[0].users);
         }
-
        
         const usersData = await fetchWithAuth(
           `http://localhost:5000/api/users?hospitalId=${hospitalId}`
@@ -130,37 +135,6 @@ export default function RoleManagement() {
       checked ? [...prev, permId] : prev.filter((id) => id !== permId)
     );
   };
-
-  // const removeUser = (userId: number) => {
-  //   if (!selectedRole) return;
-  //   const updatedUsers = roleUsers.filter((u) => u.id !== userId);
-  //   setRoleUsers(updatedUsers);
-  //   setRoles((prev) =>
-  //     prev.map((r) =>
-  //       r.id === selectedRole.id ? { ...r, users: updatedUsers } : r
-  //     )
-  //   );
-  //   setSelectedRole({ ...selectedRole, users: updatedUsers });
-  // };
-
-  // const assignUser = (userId: string) => {
-  //   if (!selectedRole) return;
-  //   const id = parseInt(userId);
-  //   if (!id) return;
-
-  //   const userToAdd = allUsers.find((u) => u.id === id);
-  //   if (!userToAdd) return;
-  //   if (roleUsers.some((u) => u.id === id)) return;
-
-  //   const updatedUsers = [...roleUsers, userToAdd];
-  //   setRoleUsers(updatedUsers);
-  //   setRoles((prev) =>
-  //     prev.map((r) =>
-  //       r.id === selectedRole.id ? { ...r, users: updatedUsers } : r
-  //     )
-  //   );
-  //   setSelectedRole({ ...selectedRole, users: updatedUsers });
-  // };
 
   const handleSaveRole = async (roleData: Role) => {
     try {

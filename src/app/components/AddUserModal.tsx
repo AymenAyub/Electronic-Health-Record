@@ -295,9 +295,10 @@ export default function AddUserModal({
 
           <div className="space-y-2">
             <Label>Role</Label>
-            <Select
+           <Select
               value={formData.roleId}
               onValueChange={(value) => setFormData({ ...formData, roleId: value })}
+              disabled={isEditing && selectedRole?.name === "Doctor"} // hide/disable role change for doctors
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select Role" />
@@ -310,6 +311,7 @@ export default function AddUserModal({
                 ))}
               </SelectContent>
             </Select>
+
           </div>
 
           {selectedRole?.name === "Doctor" && (
@@ -354,3 +356,4 @@ export default function AddUserModal({
     </Dialog>
   );
 }
+

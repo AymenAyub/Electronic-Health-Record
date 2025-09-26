@@ -64,7 +64,9 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+   <div className="min-h-screen bg-gray-100 flex justify-center">
+      <div className="bg-white w-full max-w-7xl rounded-2xl p-8">
+
       {/* Account Info */}
       <section className="bg-white shadow p-6 rounded-md">
         <h2 className="text-lg font-bold mb-4">Account Info</h2>
@@ -190,6 +192,7 @@ export default function SettingsPage() {
           </div>
         </section>
       )}
+    </div>
     </div>
   );
 }

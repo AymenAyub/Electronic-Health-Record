@@ -17,7 +17,10 @@ export default function PatientsPage() {
   const [authorized, setAuthorized] = useState(false);
 
   const params = useParams();
-  const hospitalId = params?.hospitalId;
+  const rawHospitalId = params?.hospitalId;
+  const hospitalId = Array.isArray(rawHospitalId)
+    ? rawHospitalId[0]
+    : rawHospitalId;
 
   const token = localStorage.getItem("token");
   const userStr = localStorage.getItem("user");

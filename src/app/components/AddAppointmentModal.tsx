@@ -127,13 +127,6 @@ export default function AddAppointmentModal({
                   </option>
                 ))}
               </select>
-              <button
-                type="button"
-                onClick={() => setIsAddPatientOpen(true)}
-                className="px-3 py-2 bg-green-500 text-white rounded-md flex items-center gap-1 hover:bg-green-600"
-              >
-                <Plus size={16} /> Add
-              </button>
             </div>
           </div>
 
@@ -232,17 +225,6 @@ export default function AddAppointmentModal({
           </div>
         </form>
       </div>
-
-      {isAddPatientOpen && (
-        <AddPatientModal
-          onClose={() => setIsAddPatientOpen(false)}
-          onSave={(newPatient: any) => {
-            setPatients((prev: any) => [...prev, newPatient]);
-            setFormData({ ...formData, patient_id: newPatient.patient_id });
-            setIsAddPatientOpen(false);
-          }}
-        />
-      )}
     </div>
   );
 }

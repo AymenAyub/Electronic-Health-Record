@@ -472,7 +472,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     fetchHospital();
   }, [hospitalId]);
 
-  // Menu Config
   const menuConfig: Record<string, any[]> = {
     Owner: [
       { key: "dashboard", label: "Dashboard", icon: <Home size={20} />, path: `/dashboard/${hospitalId}` },
@@ -482,7 +481,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       { key: "appointments", label: "Appointments", icon: <CalendarCheck size={20} />, path: `/dashboard/${hospitalId}/Appointments` },
       { key: "payments", label: "Payments & Billing", icon: <CreditCard size={20} />, path: `/dashboard/${hospitalId}/Payments` },
       { key: "settings", label: "Settings", icon: <Settings size={20} />, path: `/dashboard/${hospitalId}/Settings` },
-    ],
+    ], 
     Doctor: [
       { key: "dashboard", label: "Dashboard", icon: <Home size={20} />, path: `/dashboard/${hospitalId}` },
       { key: "availability", label: "My Availability", icon: <Clock size={20} />, path: `/dashboard/${hospitalId}/availability` },
@@ -490,8 +489,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       { key: "medicalHistory", label: "Medical History", icon: <FileText size={20} />, path: `/dashboard/${hospitalId}/MedicalHistory` },
       { key: "settings", label: "Settings", icon: <Settings size={20} />, path: `/dashboard/${hospitalId}/Settings` },
     ],
-    staff: [
+    Receptionist: [
       { key: "dashboard", label: "Dashboard", icon: <Home size={20} />, path: `/dashboard/${hospitalId}` },
+      { key: "doctors", label: "Doctors", icon: <User size={20} />, path: `/dashboard/${hospitalId}/Doctor` },
       { key: "patients", label: "Patients", icon: <User size={20} />, path: `/dashboard/${hospitalId}/Patients` },
       { key: "appointments", label: "Appointments", icon: <CalendarCheck size={20} />, path: `/dashboard/${hospitalId}/Appointments` },
       { key: "settings", label: "Settings", icon: <Settings size={20} />, path: `/dashboard/${hospitalId}/Settings` },
@@ -515,9 +515,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 <aside
   className={`fixed top-0 left-0 h-full flex flex-col transition-[width] duration-300 ${
     sidebarOpen ? "w-64" : "w-20"
-  } bg-gray-100 z-20`}
+  } bg-gray-50 z-20`}
 >
-  <div className="flex items-center justify-between p-5 border-b border-gray-200">
+  <div className="flex items-center justify-between p-5">
     {sidebarOpen && (
       <div className="flex items-center space-x-2">
         <Image src="/logo.png" alt="Logo" width={28} height={28} />
@@ -627,109 +627,108 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           sidebarOpen ? "ml-64" : "ml-20"
         }`}
       >
-        {/* Topbar */}
-        <header className="w-full bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          {searchOpen ? (
-            <div className="relative w-1/2">
-              <input
-                type="text"
-                placeholder="Search menu..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              {searchQuery && (
-                <ul className="absolute w-full bg-white border mt-1 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                  {filteredItems.length > 0 ? (
-                    filteredItems.map((item) => (
-                      <li
-                        key={item.key}
-                        onClick={() => {
-                          router.push(item.path);
-                          setSearchOpen(false);
-                          setSearchQuery("");
-                        }}
-                        className="px-4 py-2 cursor-pointer hover:bg-blue-50"
-                      >
-                        {item.label}
-                      </li>
-                    ))
-                  ) : (
-                    <li className="px-4 py-2 text-gray-500">No matches found</li>
-                  )}
-                </ul>
-              )}
-            </div>
-          ) : (
-            <h2 className="text-xl font-bold">{hospitalName}</h2>
-          )}
-
-          {/* Right Section */}
-          <div className="flex items-center gap-4">
-            {/* Hospital Switcher */}
-            {role === "Owner" && hospitals.length > 0 && (
-              <div className="relative">
-                <button
-                  onClick={() => setHospitalDropdownOpen(!hospitalDropdownOpen)}
-                  className="flex items-center gap-2 px-3 py-2 border rounded-lg hover:border-blue-400 transition"
+    <header className="w-full bg-gray-50 border-b border-white px-6 py-4 flex items-center justify-between">
+  {/* Left Section: Hospital Switcher */}
+  <div className="flex items-center gap-4">
+    {role === "Owner" && hospitals.length > 0 && (
+      <div className="relative">
+        <button
+          onClick={() => setHospitalDropdownOpen(!hospitalDropdownOpen)}
+          className="flex items-center gap-2 px-3 py-2 border rounded-lg hover:border-blue-400 transition"
+        >
+          <Building2 size={18} className="text-gray-500" />
+          <span className="truncate font-semibold">{hospitalName}</span>
+          <ChevronDown
+            size={16}
+            className={`transition-transform ${
+              hospitalDropdownOpen ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+        {hospitalDropdownOpen && (
+          <div className="absolute left-0 mt-2 w-56 bg-white border rounded-lg shadow-lg z-50 animate-fadeIn">
+            <ul className="max-h-48 overflow-y-auto">
+              {hospitals.map((h) => (
+                <li
+                  key={h.id}
+                  onClick={() => {
+                    handleHospitalSwitch(h.id);
+                    setHospitalDropdownOpen(false);
+                  }}
+                  className={`px-4 py-2 cursor-pointer hover:bg-blue-50 ${
+                    hospitalId === h.id
+                      ? "bg-blue-100 font-semibold text-blue-600"
+                      : ""
+                  }`}
                 >
-                  <Building2 size={18} className="text-gray-500" />
-                  <span className="truncate">{hospitalName}</span>
-                  <ChevronDown
-                    size={16}
-                    className={`transition-transform ${
-                      hospitalDropdownOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                {hospitalDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white border rounded-lg shadow-lg z-50 animate-fadeIn">
-                    <ul className="max-h-48 overflow-y-auto">
-                      {hospitals.map((h) => (
-                        <li
-                          key={h.id}
-                          onClick={() => {
-                            handleHospitalSwitch(h.id);
-                            setHospitalDropdownOpen(false);
-                          }}
-                          className={`px-4 py-2 cursor-pointer hover:bg-blue-50 ${
-                            hospitalId === h.id
-                              ? "bg-blue-100 font-semibold text-blue-600"
-                              : ""
-                          }`}
-                        >
-                          {h.name}
-                        </li>
-                      ))}
-                      <li
-                        onClick={() => handleHospitalSwitch("add")}
-                        className="px-4 py-2 cursor-pointer text-green-600 font-semibold hover:bg-green-50 border-t"
-                      >
-                        + Add Hospital
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Icons */}
-            <button
-              onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2 hover:bg-gray-100 rounded-lg"
-            >
-              <Search size={20} className="text-gray-600" />
-            </button>
-            <button className="p-2 hover:bg-gray-100 rounded-lg">
-              <Bell size={20} className="text-gray-600" />
-            </button>
-            <button className="p-2 hover:bg-gray-100 rounded-lg">
-              <Settings size={20} className="text-gray-600" />
-            </button>
+                  {h.name}
+                </li>
+              ))}
+              <li
+                onClick={() => handleHospitalSwitch("add")}
+                className="px-4 py-2 cursor-pointer text-green-600 font-semibold hover:bg-green-50 border-t"
+              >
+                + Add Hospital
+              </li>
+            </ul>
           </div>
-        </header>
+        )}
+      </div>
+    )}
+  </div>
 
-        <div className="p-8 overflow-auto bg-white flex-1">{children}</div>
+  {/* Center Section: Search Bar */}
+  <div className="flex-1 flex justify-center mx-4">
+    {searchOpen && (
+      <div className="relative w-1/2">
+        <input
+          type="text"
+          placeholder="Search menu..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        {searchQuery && (
+          <ul className="absolute w-full bg-white border mt-1 rounded-lg shadow-lg max-h-48 overflow-y-auto z-50">
+            {filteredItems.length > 0 ? (
+              filteredItems.map((item) => (
+                <li
+                  key={item.key}
+                  onClick={() => {
+                    router.push(item.path);
+                    setSearchOpen(false);
+                    setSearchQuery("");
+                  }}
+                  className="px-4 py-2 cursor-pointer hover:bg-blue-50"
+                >
+                  {item.label}
+                </li>
+              ))
+            ) : (
+              <li className="px-4 py-2 text-gray-500">No matches found</li>
+            )}
+          </ul>
+        )}
+      </div>
+    )}
+  </div>
+
+  {/* Right Section: Icons */}
+  <div className="flex items-center gap-4">
+    <button
+      onClick={() => setSearchOpen(!searchOpen)}
+      className="p-2 hover:bg-gray-100 rounded-lg"
+    >
+      <Search size={20} className="text-gray-600" />
+    </button>
+    <button className="p-2 hover:bg-gray-100 rounded-lg">
+      <Settings size={20} className="text-gray-600" />
+    </button>
+  </div>
+</header>
+
+
+        <div className="rounded-xl overflow-auto flex-1 p-8 bg-white">{children}</div>
       </main>
     </div>
   );

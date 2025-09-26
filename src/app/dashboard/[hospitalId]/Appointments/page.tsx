@@ -181,7 +181,7 @@ export default function AppointmentsPage() {
 
   return (
     <div className="flex max-w-7xl mx-auto p-6 gap-6 flex-col">
-      {/* Header */}
+  
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-2 mb-3 md:mb-0">
           <Calendar size={28} className="text-blue-600" />
@@ -209,7 +209,7 @@ export default function AppointmentsPage() {
 
         </div>
 
-        {(role === "Owner" || role === "staff") && (
+        {(role === "Owner" || role === "Receptionist") && (
           <button
             onClick={() => setIsModalOpen(true)}
             className="bg-blue-600 text-white px-5 py-3 rounded-xl hover:bg-blue-700 transition-all duration-200 flex items-center gap-2 font-semibold"
