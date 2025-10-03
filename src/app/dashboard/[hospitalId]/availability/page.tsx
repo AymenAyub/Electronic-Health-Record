@@ -780,8 +780,8 @@ export default function DoctorAvailability() {
             handleDelete(deleteIndex);
             setIsDeleteModalOpen(false);
           }}
-          title="Delete Availability"
-          description="Are you sure you want to delete this availability?"
+          itemName="this availability"
+         
         />
       )}
     </div>
