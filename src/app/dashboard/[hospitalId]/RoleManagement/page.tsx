@@ -83,7 +83,6 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
               }))
             );
 
-
       
         const roleData = await fetchWithAuth(
           `http://localhost:5000/api/roles?hospitalId=${hospitalId}`

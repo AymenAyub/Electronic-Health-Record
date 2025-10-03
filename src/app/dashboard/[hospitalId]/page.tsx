@@ -131,11 +131,11 @@ export default function DashboardPage() {
       { label: "Appointments Today", value: stats.appointmentsToday, icon: <CalendarCheck className="text-yellow-500" size={28} /> },
       { label: "Revenue Collected", value: `Rs. ${stats.revenueCollected}`, icon: <DollarSign className="text-orange-500" size={28} /> },
     ],
-    doctor: [
+    Doctor: [
       { label: "Appointments Today", value: stats.appointmentsToday, icon: <CalendarCheck className="text-blue-500" size={28} /> },
       { label: "Total Patients", value: stats.totalPatients, icon: <User className="text-green-500" size={28} /> },
     ],
-    staff: [
+    Receptionist: [
       { label: "Appointments Today", value: stats.appointmentsToday, icon: <CalendarCheck className="text-blue-500" size={28} /> },
       { label: "Total Patients", value: stats.totalPatients, icon: <User className="text-green-500" size={28} /> },
       { label: "Active Doctors", value: stats.activeDoctors, icon: <Stethoscope className="text-yellow-500" size={28} /> },
@@ -157,23 +157,23 @@ export default function DashboardPage() {
         </div>
 
 
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-  {cards.map(({ label, value, icon }) => (
-    <div
-      key={label}
-      className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-lg transition"
-    >
-      {/* Icon + Value in one line */}
-      <div className="flex items-center gap-2 text-gray-900">
-        <span className="text-blue-600">{icon}</span>
-        <span className="text-2xl font-bold">{value}</span>
-      </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {cards.map(({ label, value, icon }) => (
+        <div
+          key={label}
+          className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-lg transition"
+        >
+          {/* Icon + Value in one line */}
+          <div className="flex items-center gap-2 text-gray-900">
+            <span className="text-blue-600">{icon}</span>
+            <span className="text-2xl font-bold">{value}</span>
+          </div>
 
-      {/* Label below */}
-      <span className="text-sm text-gray-500 mt-2">{label}</span>
+          {/* Label below */}
+          <span className="text-sm text-gray-500 mt-2">{label}</span>
+        </div>
+      ))}
     </div>
-  ))}
-</div>
 
 
         {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8"> */}

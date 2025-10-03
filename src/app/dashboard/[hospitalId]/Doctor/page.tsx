@@ -28,7 +28,7 @@ export default function DoctorsPage() {
 
     const fetchDoctors = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/admin/getDoctors?hospital_id=${hospitalId}`, {
+        const res = await fetch(`http://localhost:5000/api/getDoctors?hospitalId=${hospitalId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -131,7 +131,6 @@ export default function DoctorsPage() {
 
   return (
     <div className="p-4">
-
     <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-2 mb-3 md:mb-0">
           <Stethoscope size={28} className="text-blue-600" />

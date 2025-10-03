@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FileText, Search, PlusCircle } from "lucide-react";
+import { FileText, Search } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function MedicalHistoryPage() {
   const [patients, setPatients] = useState<any[]>([]);
@@ -12,29 +13,42 @@ export default function MedicalHistoryPage() {
   const params = useParams();
   const hospitalId = params?.hospitalId;
 
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const role = typeof window !== "undefined" ? localStorage.getItem("role") : null;
 
   const fetchPatients = async () => {
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/getDoctorPatients?hospitalId=${hospitalId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      let url = "";
+
+      if (role === "Owner") {
+        url = `http://localhost:5000/api/getPatients?hospitalId=${hospitalId}`;
+      } else if (role === "Doctor") {
+        url = `http://localhost:5000/api/getDoctorPatients?hospitalId=${hospitalId}`;
+      } else {
+        setPatients([]);
+        return;
+      }
+
+      const res = await fetch(url, 
+        { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
-      if (res.ok) setPatients(data.patients);
-      else alert(data.message || "Failed to fetch patients");
+
+      if (res.ok) {
+        setPatients(data.patients);
+      } else {
+        toast.error(data.message || "Failed to fetch patients");
+      }
     } catch (err) {
       console.error(err);
-      alert("Error fetching patients");
+      toast.error("Error fetching patients");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (token) fetchPatients();
-  }, [token]);
+    if (token && role) fetchPatients();
+  }, [token, role]);
 
   const filteredPatients = patients.filter((p) =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -57,13 +71,6 @@ export default function MedicalHistoryPage() {
             Patient Medical History
           </h1>
         </div>
-        {/* <button
-          onClick={() => alert("Add medical history clicked")}
-          className="bg-blue-600 text-white px-5 py-3 rounded-xl hover:bg-blue-700 transition-all duration-200 flex items-center gap-2 font-semibold"
-        >
-          <PlusCircle size={18} />
-          Add Medical History
-        </button> */}
       </div>
 
       {/* Search */}
@@ -102,18 +109,14 @@ export default function MedicalHistoryPage() {
                   key={p.patient_id}
                   className="border border-gray-200 hover:bg-gray-50"
                 >
-                  <td className="px-6 py-3 font-medium text-gray-800">
-                    {p.name}
-                  </td>
+                  <td className="px-6 py-3 font-medium text-gray-800">{p.name}</td>
                   <td className="px-6 py-3">{p.age}</td>
                   <td className="px-6 py-3">{p.gender}</td>
                   <td className="px-6 py-3">{p.contact}</td>
                   <td className="px-6 py-3 text-center">
                     <button
                       onClick={() =>
-                        router.push(
-                          `/dashboard/${hospitalId}/MedicalHistory/${p.patient_id}`
-                        )
+                        router.push(`/dashboard/${hospitalId}/MedicalHistory/${p.patient_id}`)
                       }
                       className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
                     >
@@ -124,10 +127,7 @@ export default function MedicalHistoryPage() {
               ))
             ) : (
               <tr>
-                <td
-                  colSpan={5}
-                  className="px-6 py-4 text-center text-gray-500"
-                >
+                <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
                   No patients found.
                 </td>
               </tr>

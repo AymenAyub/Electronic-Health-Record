@@ -5,7 +5,7 @@ export default function DeleteModal({
   isOpen,
   onClose,
   onConfirm,
-  itemName = "this item",  // 👈 default text agar kuch pass na karo
+  itemName = "this item",  
 }: {
   isOpen: boolean;
   onClose: () => void;

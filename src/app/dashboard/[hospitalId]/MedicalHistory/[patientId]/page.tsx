@@ -39,20 +39,29 @@ export default function PatientProfilePage() {
   const [deleteHistory, setDeleteHistory] = useState<string | null>(null);
 
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const role = typeof window !== "undefined" ? localStorage.getItem("role") : null;
 
-  // Fetch patient info
+
   useEffect(() => {
     const fetchPatient = async () => {
-      try {
-        const res = await fetch(
-          `http://localhost:5000/api/getDoctorPatients?hospitalId=${hospitalId}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+              try {
+              let url = "";
+        if (role === "Owner") {
+          url = `http://localhost:5000/api/getPatients?hospitalId=${hospitalId}`;
+        } else if (role === "Doctor") {
+          url = `http://localhost:5000/api/getDoctorPatients?hospitalId=${hospitalId}`;
+        } else {
+          setPatient(null);
+          setError("Unauthorized");
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch(url, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
 
         const data = await res.json();
         if (res.ok) {
@@ -77,7 +86,6 @@ export default function PatientProfilePage() {
     if (hospitalId && patientId) fetchPatient();
   }, [hospitalId, patientId, token]);
 
-  // Fetch medical history
   const fetchHistory = async () => {
     try {
       const res = await fetch(
@@ -92,7 +100,6 @@ export default function PatientProfilePage() {
 
       const data = await res.json();
       if (res.ok) {
-        // Ensure only valid objects with history_id
         setHistory(Array.isArray(data.history) ? data.history.filter(Boolean) : []);
       } else {
         console.error("Error fetching history:", data.message);
@@ -106,7 +113,7 @@ export default function PatientProfilePage() {
     if (hospitalId && patientId) fetchHistory();
   }, [hospitalId, patientId, token]);
 
-  // Add or update history
+
   const handleSaveHistory = async (formData: any) => {
     try {
       const url = editingHistory
@@ -154,7 +161,6 @@ export default function PatientProfilePage() {
     }
   };
 
-  // Delete history
   const handleDeleteHistory = async (historyId: string) => {
     try {
       const res = await fetch(

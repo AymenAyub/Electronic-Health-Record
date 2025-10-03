@@ -35,7 +35,7 @@ export default function AppointmentsPage() {
   const fetchAppointments = async () => {
     try {
       let url = "";
-      if (role === "doctor") {
+      if (role === "Doctor") {
         url = "http://localhost:5000/api/getDoctorAppointments"; // only their appointments
       } else {
         url = `http://localhost:5000/api/appointments?hospitalId=${hospitalId}`;
@@ -116,7 +116,7 @@ export default function AppointmentsPage() {
     try {
       const url = editingAppointment
         ? `http://localhost:5000/api/updateAppointment/${editingAppointment.id}?hospitalId=${hospitalId}`
-        : "http://localhost:5000/api/scheduleAppointment?hospitalId=${hospitalId}";
+        : `http://localhost:5000/api/scheduleAppointment?hospitalId=${hospitalId}`;
       const method = editingAppointment ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -181,7 +181,7 @@ export default function AppointmentsPage() {
 
   return (
     <div className="flex max-w-7xl mx-auto p-6 gap-6 flex-col">
-  
+   
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-2 mb-3 md:mb-0">
           <Calendar size={28} className="text-blue-600" />
@@ -304,7 +304,7 @@ export default function AppointmentsPage() {
                     </span>
                   </td>
 
-                  {(role === "Admin" || role === "Owner") && (
+                  {(role === "Admin" || role === "Owner" || role === "Receptioninst") && (
                     <td className="px-6 py-3 flex gap-2">
                       <button
                         onClick={() => {

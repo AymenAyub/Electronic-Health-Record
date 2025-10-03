@@ -13,14 +13,10 @@ export default function RegisterHospital() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    subdomain: "",
     phone: "",
     address: "",
   });
 
-  const [checking, setChecking] = useState(false);
-  const [available, setAvailable] = useState<Availability>(null);
-  const [normalized, setNormalized] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const token = localStorage.getItem("token");
@@ -31,12 +27,6 @@ export default function RegisterHospital() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     let { name, value } = e.target;
-    if (name === "subdomain") {
-      value = value
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .replace(/[^a-z0-9-]/g, "");
-    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -50,41 +40,6 @@ export default function RegisterHospital() {
     }
   }, [router]);
 
-  useEffect(() => {
-    const value = formData.subdomain;
-
-    if (!value) {
-      setAvailable(null);
-      setNormalized("");
-      return;
-    }
-    if (value.length < 3) {
-      setAvailable(null);
-      setNormalized(value);
-      return;
-    }
-
-    const timer = setTimeout(async () => {
-      setChecking(true);
-      try {
-        const res = await fetch(
-          `http://localhost:5000/api/hospital/check-subdomain/${encodeURIComponent(
-            value
-          )}`
-        );
-        const data = await res.json();
-        setAvailable(Boolean(data.available));
-        setNormalized(data.normalized || value);
-      } catch (err) {
-        console.error(err);
-        setAvailable(null);
-      } finally {
-        setChecking(false);
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [formData.subdomain]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,22 +54,7 @@ export default function RegisterHospital() {
         return;
       }
 
-      if (available === false) {
-        setMessage("Please choose another subdomain.");
-        return;
-      }
-  
-      const sanitizedSubdomain = formData.subdomain
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .replace(/[^a-z0-9-]/g, "");
-
-      if (sanitizedSubdomain.length < 3) {
-        setMessage("Invalid subdomain. Min length is 3.");
-        return;
-      }
-
-      const payload = { ...formData, subdomain: sanitizedSubdomain };
+      const payload = {...formData};
 
       const res = await fetch(
         "http://localhost:5000/api/hospital/registerHospital",
@@ -131,7 +71,6 @@ export default function RegisterHospital() {
       const data = await res.json();
 
       if (res.ok && data.hospital) {
-        // setFormData({ name: "", email: "", subdomain: "", phone: "", address: "" });
         setMessage("Hospital registered successfully!");
         const existingHospitals = JSON.parse(localStorage.getItem("hospitals") || "[]");
         const updatedHospitals = [...existingHospitals,  { hospital: data.hospital }];
@@ -139,7 +78,7 @@ export default function RegisterHospital() {
         "hospitals",
        JSON.stringify(updatedHospitals)
   );
-        // setTimeout(() => router.push("/SelectHospital"), 1200);
+
       setTimeout(() => router.push(`/dashboard/${data.hospital.id}`), 1200);
 
       } else {
@@ -150,7 +89,7 @@ export default function RegisterHospital() {
       setMessage("Something went wrong");
     } finally {
       setLoading(false);
-    }``
+    }
   };
 
   if (loading) {
@@ -167,7 +106,7 @@ export default function RegisterHospital() {
           </h2>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
-            {/* Name */}
+           
             <div className="relative">
               <label htmlFor="name" className="block text-gray-700 font-medium mb-1">
                 Hospital Name
@@ -185,7 +124,7 @@ export default function RegisterHospital() {
               />
             </div>
 
-            {/* Email */}
+           
             <div className="relative">
               <label htmlFor="email" className="block text-gray-700 font-medium mb-1">
                 Hospital Email
@@ -203,45 +142,7 @@ export default function RegisterHospital() {
               />
             </div>
 
-            {/* Subdomain */}
-            <div className="relative">
-              <label htmlFor="subdomain" className="block text-gray-700 font-medium mb-1">
-                Hospital Subdomain
-              </label>
-              <Globe className="absolute left-3 top-10 text-gray-400" size={18} />
-              <input
-                id="subdomain"
-                type="text"
-                name="subdomain"
-                value={formData.subdomain}
-                onChange={handleChange}
-                placeholder="e.g. city-care"
-                required
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition text-sm"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Only lowercase letters, numbers and hyphens. Min 3 chars.
-              </p>
-
-              {formData.subdomain.length > 0 && formData.subdomain.length < 3 && (
-              <p className="text-xs text-red-600 mt-1">
-               Subdomain must be at least 3 characters.
-              </p>
-  )}
-
-              {/* Real-time status */}
-              {checking && <p className="text-xs text-gray-500 mt-1">Checking availability…</p>}
-              {!checking && available === true && (
-                <p className="text-xs text-green-600 mt-1">
-                  Available {normalized ? `(${normalized})` : ""}
-                </p>
-              )}
-              {!checking && available === false && (
-                <p className="text-xs text-red-600 mt-1"> Already taken. Try another.</p>
-              )}
-            </div>
-
-            {/* Phone */}
+           
             <div className="relative">
               <label htmlFor="phone" className="block text-gray-700 font-medium mb-1">
                 Phone Number
@@ -278,7 +179,7 @@ export default function RegisterHospital() {
 
             <button
               type="submit"
-              disabled={loading || checking || available === false || formData.subdomain.length < 3}
+              disabled={loading}
               className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow transition duration-300 hover:shadow-purple-500/30 text-sm disabled:opacity-50"
             >
               {loading ? "Registering..." : "Add Hospital"}
