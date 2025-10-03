@@ -54,7 +54,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         const data = await res.json();
         setRole(data.role);
         setUserEmail(data.email || "user@email.com");
-        setPermissions((data.permissions || []).map(p => p.name));
+        setPermissions((data.permissions || []).map((p : { name: string })=> p.name));
         setLoading(false);
       } catch (err) {
         console.error(err);
