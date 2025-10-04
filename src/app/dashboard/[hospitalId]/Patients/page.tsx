@@ -15,65 +15,66 @@ export default function PatientsPage() {
   const [editingPatient, setEditingPatient] = useState<any | null>(null);
   const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
   const [authorized, setAuthorized] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const params = useParams();
   const rawHospitalId = params?.hospitalId;
-  const hospitalId = Array.isArray(rawHospitalId)
-    ? rawHospitalId[0]
-    : rawHospitalId;
+  const hospitalId = Array.isArray(rawHospitalId) ? rawHospitalId[0] : rawHospitalId;
 
-  const token = localStorage.getItem("token");
-  const userStr = localStorage.getItem("user");
   const router = useRouter();
-
-  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(null);
+  const [userStr, setUserStr] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!token) {
-      router.push("/Login");
-    } else {
-      setLoading(false); 
+    if (typeof window !== "undefined") {
+      const storedToken = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("user");
+
+      if (!storedToken || !storedUser) {
+        router.push("/Login");
+        return;
+      }
+
+      setToken(storedToken);
+      setUserStr(storedUser);
+      setAuthorized(true);
+      setLoading(false);
+
+      fetchPatients(storedToken);
     }
   }, [router]);
 
- 
-  const fetchPatients = async () => {
+  const fetchPatients = async (authToken: string) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/getPatients?hospitalId=${hospitalId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `http://localhost:5000/api/getPatients?hospitalId=${hospitalId}`,
+        { headers: { Authorization: `Bearer ${authToken}` } }
+      );
       const data = await res.json();
       if (res.ok) setPatients(data.patients);
-      else 
-        toast.error(data.message || "Failed to fetch patients");
+      else toast.error(data.message || "Failed to fetch patients");
     } catch (err) {
       console.error(err);
       toast.error("Error fetching patients");
     }
   };
 
-  useEffect(() => {
-    if (!token || !userStr) {
-      router.push("/Login");
-    }
-    setAuthorized(true);
-    fetchPatients();
-  }, [router]);
-
-  if (!authorized) return null;
-
   const handleDelete = async (id: string) => {
+    if (!token) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/patients/deletePatient/${id}?hospitalId=${hospitalId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(
+        `http://localhost:5000/api/patients/deletePatient/${id}?hospitalId=${hospitalId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (res.ok) {
         toast.success("Patient deleted successfully");
-        fetchPatients();
+        fetchPatients(token);
       } else {
         const err = await res.json();
         toast.error(err.message || "Failed to delete patient");
@@ -87,6 +88,7 @@ export default function PatientsPage() {
   };
 
   const handleSavePatient = async (patientData: any) => {
+    if (!token) return;
     try {
       const url = editingPatient
         ? `http://localhost:5000/api/patients/updatePatient/${editingPatient.patient_id}?hospitalId=${hospitalId}`
@@ -104,7 +106,7 @@ export default function PatientsPage() {
 
       const data = await res.json();
       if (res.ok) {
-        fetchPatients();
+        fetchPatients(token);
         setIsModalOpen(false);
         setEditingPatient(null);
         toast.success("Patient saved successfully");
@@ -124,6 +126,8 @@ export default function PatientsPage() {
   if (loading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
+
+  if (!authorized) return null;
 
   return (
     <div className="p-4">

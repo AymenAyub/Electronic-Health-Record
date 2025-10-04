@@ -11,12 +11,33 @@ export default function MedicalHistoryPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
   const params = useParams();
-  const hospitalId = params?.hospitalId;
+  const rawHospitalId = params?.hospitalId;
+  const hospitalId = Array.isArray(rawHospitalId) ? rawHospitalId[0] : rawHospitalId;
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  const role = typeof window !== "undefined" ? localStorage.getItem("role") : null;
 
+  const [token, setToken] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
+  const [authorized, setAuthorized] = useState(false);
+
+useEffect(() => {
+  if (typeof window !== "undefined") {
+    const storedToken = localStorage.getItem("token");
+    const storedRole = localStorage.getItem("role");
+
+    if (!storedToken || !storedRole) {
+      router.push("/Login");
+      return;
+    }
+
+    setToken(storedToken);
+    setRole(storedRole);
+    setAuthorized(true);
+  }
+}, [router]);
+
+  
   const fetchPatients = async () => {
+     if (!token) return;
     try {
       let url = "";
 
@@ -47,8 +68,8 @@ export default function MedicalHistoryPage() {
   };
 
   useEffect(() => {
-    if (token && role) fetchPatients();
-  }, [token, role]);
+    if (token && role && authorized) fetchPatients();
+  }, [token, role, authorized]);
 
   const filteredPatients = patients.filter((p) =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase())

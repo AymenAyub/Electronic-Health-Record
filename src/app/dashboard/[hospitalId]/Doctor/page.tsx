@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import DoctorCard from "@/app/components/Admin/DoctorCard";
 import AddDoctorModal from "@/app/components/Admin/AddDoctorModal";
 import DeleteModal from "@/app/components/Admin/DeleteModal";
-import { Stethoscope, UserPlus, Search } from "lucide-react";
+import { Stethoscope, Search } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 
 export default function DoctorsPage() {
@@ -15,62 +15,68 @@ export default function DoctorsPage() {
   const [editingDoctor, setEditingDoctor] = useState<any | null>(null);
   const [authorized, setAuthorized] = useState(false);
   const [deleteDoctorId, setDeleteDoctorId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const token = localStorage.getItem("token");
-  const userStr = localStorage.getItem("user");
+  const [token, setToken] = useState<string | null>(null);
+  const [userStr, setUserStr] = useState<string | null>(null);
 
   const router = useRouter();
   const params = useParams();
   const hospitalId = params?.hospitalId;
-  const [loading, setLoading] = useState(true);
 
   
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedToken = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("user");
 
-    const fetchDoctors = async () => {
-      try {
-        const res = await fetch(`http://localhost:5000/api/getDoctors?hospitalId=${hospitalId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (res.ok) setDoctors(data.doctors);
-        else alert(data.message || "Failed to fetch doctors");
-      } catch (err) {
-        console.error(err);
-        alert("Error fetching doctors");
-      }
-    };
-
-    useEffect(() => {
-      if (!token || !userStr) {
+      if (!storedToken || !storedUser) {
         router.push("/Login");
         return;
-    
-    } else {
-      setLoading(false);
+      }
+
+      setToken(storedToken);
+      setUserStr(storedUser);
       setAuthorized(true);
-      fetchDoctors(); 
+      setLoading(false);
+
+      // Fetch doctors after token is loaded
+      fetchDoctors(storedToken);
     }
   }, [router]);
-  
-    
-  if (!authorized) {
-    return null; 
-  }
+
+  const fetchDoctors = async (authToken: string) => {
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/getDoctors?hospitalId=${hospitalId}`,
+        { headers: { Authorization: `Bearer ${authToken}` } }
+      );
+      const data = await res.json();
+      if (res.ok) setDoctors(data.doctors);
+      else alert(data.message || "Failed to fetch doctors");
+    } catch (err) {
+      console.error(err);
+      alert("Error fetching doctors");
+    }
+  };
 
   const handleDelete = async (id: string) => {
-  
+    if (!token) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/deleteUser/${id}?hospitalId=${hospitalId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-  
+      const res = await fetch(
+        `http://localhost:5000/api/admin/deleteUser/${id}?hospitalId=${hospitalId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       if (res.ok) {
         alert("Doctor deleted successfully");
-        fetchDoctors(); 
+        fetchDoctors(token);
       } else {
         const err = await res.json();
         alert(err.message || "Failed to delete doctor");
@@ -78,20 +84,20 @@ export default function DoctorsPage() {
     } catch (error) {
       console.error("Delete error:", error);
       alert("Something went wrong");
-    }
-    finally {
-      setDeleteDoctorId(null); 
+    } finally {
+      setDeleteDoctorId(null);
     }
   };
-  
+
   const handleSaveDoctor = async (doctorData: any) => {
+    if (!token) return;
     try {
       const url = editingDoctor
         ? `http://localhost:5000/api/updateUser/${editingDoctor.user_id}?hospitalId=${hospitalId}`
         : "http://localhost:5000/api/admin/addDoctor";
-  
+
       const method = editingDoctor ? "PUT" : "POST";
-  
+
       const res = await fetch(url, {
         method,
         headers: {
@@ -100,11 +106,11 @@ export default function DoctorsPage() {
         },
         body: JSON.stringify(doctorData),
       });
-  
+
       const data = await res.json();
-  
+
       if (res.ok) {
-        fetchDoctors();
+        fetchDoctors(token);
         setIsModalOpen(false);
         setEditingDoctor(null);
       } else {
@@ -115,19 +121,24 @@ export default function DoctorsPage() {
       alert("Error saving doctor");
     }
   };
-  
 
-  const specialties = Array.from(new Set(doctors.map(d => d.specialty)));
+  const specialties = Array.from(new Set(doctors.map((d) => d.specialty)));
 
   const filteredDoctors = doctors.filter((doctor) => {
-    const matchesName = (doctor.name || "").toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSpecialty = selectedSpecialty ? doctor.specialty === selectedSpecialty : true;
+    const matchesName = (doctor.name || "")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesSpecialty = selectedSpecialty
+      ? doctor.specialty === selectedSpecialty
+      : true;
     return matchesName && matchesSpecialty;
   });
 
   if (loading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
+
+  if (!authorized) return null;
 
   return (
     <div className="p-4">

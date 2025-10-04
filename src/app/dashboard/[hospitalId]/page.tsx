@@ -28,21 +28,27 @@ export default function DashboardPage() {
   const [chartData, setChartData] = useState<any[]>([]);
   const [pieData, setPieData] = useState<any[]>([]);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  const role = typeof window !== "undefined" ? localStorage.getItem("role") : null;
+  const [token, setToken] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!token) {
-      router.push("/Login");
-    } else {
-      setLoading(false);
-    }
-  }, [router, token]);
+useEffect(() => {
+  if (typeof window !== "undefined") {
+    const storedToken = localStorage.getItem("token");
+    const storedRole = localStorage.getItem("role");
+    setToken(storedToken);
+    setRole(storedRole);
+    if (!storedToken) router.push("/Login");
+  }
+}, [router]);
 
-  useEffect(() => {
+
+ useEffect(() => {
+  if (typeof window !== "undefined") {
     const storedHospitals = JSON.parse(localStorage.getItem("hospitals") || "[]");
     setHospitals(storedHospitals);
-  }, []);
+  }
+}, []);
+
 
   useEffect(() => {
     if (!hospitalId || !token || hospitals.length === 0) return;
@@ -76,18 +82,6 @@ export default function DashboardPage() {
         );
         const { chartData } = await chartRes.json();
         setChartData(chartData);
-
-
-        // // Placeholder chart data
-        // setChartData([
-        //   { name: "Mon", Appointments: 5 },
-        //   { name: "Tue", Appointments: 8 },
-        //   { name: "Wed", Appointments: 4 },
-        //   { name: "Thu", Appointments: 10 },
-        //   { name: "Fri", Appointments: 7 },
-        //   { name: "Sat", Appointments: 3 },
-        //   { name: "Sun", Appointments: 6 },
-        // ]);
 
       } catch (err) {
         console.error(err);
@@ -216,34 +210,6 @@ export default function DashboardPage() {
           </div> */}
         </div>
 
-        {/* Recent Activities Table */}
-        {/* <section className="mb-8 max-w-6xl mx-auto">
-          <h3 className="text-xl font-semibold mb-4 text-gray-700">Recent Activities</h3>
-          <div className="overflow-x-auto bg-white rounded-md shadow border border-gray-200">
-            <table className="w-full text-sm text-left text-gray-600">
-              <thead className="bg-gray-100 text-gray-700 text-xs uppercase">
-                <tr>
-                  <th className="px-4 py-3">Time</th>
-                  <th className="px-4 py-3">Type</th>
-                  <th className="px-4 py-3">Doctor</th>
-                  <th className="px-4 py-3">Patient</th>
-                  <th className="px-4 py-3">Notes</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentActivities.map((act, idx) => (
-                  <tr key={idx} className="border-b border-gray-100 hover:bg-blue-50 transition-colors">
-                    <td className="px-4 py-3">{act.time}</td>
-                    <td className="px-4 py-3">{act.type}</td>
-                    <td className="px-4 py-3">{act.doctor}</td>
-                    <td className="px-4 py-3">{act.patient}</td>
-                    <td className="px-4 py-3">{act.notes}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section> */}
       </div>
   );
 }

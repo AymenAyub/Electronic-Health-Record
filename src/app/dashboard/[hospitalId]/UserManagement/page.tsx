@@ -46,7 +46,6 @@ export default function UserManagement() {
   const [deleteUserId, setDeleteUserId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
-
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState("All");
 
@@ -56,25 +55,50 @@ export default function UserManagement() {
     ? rawHospitalId[0]
     : rawHospitalId;
 
-  const token = localStorage.getItem("token");
-  const userStr = localStorage.getItem("user");
   const router = useRouter();
 
-  const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
-    const res = await fetch(url, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
-        ...(options.headers || {}),
-      },
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      toast(err.message || "API request failed");
+  const [token, setToken] = useState<string | null>(null);
+  const [userStr, setUserStr] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+    setToken(storedToken);
+    setUserStr(storedUser);
+
+    if (!storedToken || !storedUser) {
+      router.push("/Login");
+    } else {
+      setAuthorized(true);
     }
-    return res.json();
-  };
+  }, [hospitalId]);
+
+  useEffect(() => {
+  if (token && userStr) {
+    fetchUsersAndRoles();
+  }
+}, [hospitalId, token, userStr]);
+
+  const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+      ...(options.headers || {}),
+    },
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    toast.error(data.message || "API request failed");
+    throw new Error(data.message || "API request failed");
+  }
+
+  return data;
+};
+
 
   const fetchUsersAndRoles = async () => {
     try {
@@ -111,22 +135,6 @@ export default function UserManagement() {
       toast.error("Failed to load roles or users");
     }
   };
-
-  useEffect(() => {
-    if (!token) {
-      router.push("/Login");
-    } else {
-      setLoading(false);
-    }
-  }, [router]);
-
-  useEffect(() => {
-    if (!token || !userStr) {
-      router.push("/Login");
-    }
-    setAuthorized(true);
-    fetchUsersAndRoles();
-  }, [hospitalId]);
 
   if (!authorized) return null;
 
@@ -185,7 +193,7 @@ export default function UserManagement() {
     if (!deleteUserId) return;
     try {
       await fetchWithAuth(
-        `http://localhost:5000/api/deleteUser/${deleteUserId}?hospital_id=${hospitalId}`,
+        `http://localhost:5000/api/deleteUser/${deleteUserId}?hospitalId=${hospitalId}`,
         { method: "DELETE" }
       );
       toast.success("User deleted successfully");

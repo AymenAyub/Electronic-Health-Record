@@ -15,10 +15,10 @@ interface Role {
   name: string;
   description: string;
   permissions: number[];
-  users: User[];
+  users: RoleUser[];
 }
 
-interface User {
+interface RoleUser {
   id: number;
   name: string;
   email: string;
@@ -34,9 +34,9 @@ export default function RoleManagement() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [permissions, setPermissions] = useState<number[]>([]);
-  const [roleUsers, setRoleUsers] = useState<User[]>([]);
+  const [roleUsers, setRoleUsers] = useState<RoleUser[]>([]);
   const [allPermissions, setAllPermissions] = useState<Permission[]>([]);
-  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [allUsers, setAllUsers] = useState<RoleUser[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
@@ -109,11 +109,14 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
         const usersData = await fetchWithAuth(
           `http://localhost:5000/api/users?hospitalId=${hospitalId}`
         );
-        const formattedUsers = usersData.map((row: any) => ({
-          id: row.user.user_id,
-          name: row.user.name,
-          email: row.user.email,
+        const formattedUsers = usersData
+          .filter((row: any) => row.user)
+          .map((row: any) => ({
+            id: row.user.user_id,
+            name: row.user.name,
+            email: row.user.email,
         }));
+
         setAllUsers(formattedUsers);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -150,6 +153,11 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
           permissions: roleData.permissions,
         }),
       });
+
+      if (!data ) {
+          toast.error("Failed to fetch role data");
+          return;
+       }
 
       if (editingRole) {
         const updatedPermissions = data.role.permissions.map(
@@ -208,6 +216,12 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
           }),
         }
       );
+
+      if (!data || !data.role) {
+        toast.error("Failed to fetch role data");
+        return;
+      }
+
 
       const updatedPermissions = data.role.permissions.map(
         (p: any) => p.permission_id

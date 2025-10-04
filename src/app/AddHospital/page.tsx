@@ -1,16 +1,20 @@
-
 "use client";
 
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { User, Phone, Globe, MapPin, Mail } from "lucide-react";
-import { redirect, useRouter } from "next/navigation";
+import { User, Phone, MapPin, Mail } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-type Availability = null | boolean;
+type FormData = {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+};
 
 export default function RegisterHospital() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     phone: "",
@@ -18,44 +22,42 @@ export default function RegisterHospital() {
   });
 
   const [message, setMessage] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const token = localStorage.getItem("token");
+  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(null);
+
   const router = useRouter();
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const t = localStorage.getItem("token");
+      if (!t) {
+        router.push("/Login");
+      } else {
+        setToken(t);
+        setLoading(false);
+      }
+    }
+  }, [router]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    let { name, value } = e.target;
+    const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
-  useEffect(() => {
-    if (!token) {
-      setLoading(true);
-      router.push("/Login");
-
-    } else {
-      setLoading(false); 
-    }
-  }, [router]);
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
 
+    if (!token) {
+      setMessage("Please login as admin first.");
+      router.push("/Login");
+      return;
+    }
+
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setMessage("Please login as admin first.");
-        router.push("/Login");
-        return;
-      }
-
-      const payload = {...formData};
-
       const res = await fetch(
         "http://localhost:5000/api/hospital/registerHospital",
         {
@@ -64,7 +66,7 @@ export default function RegisterHospital() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(payload), 
+          body: JSON.stringify(formData),
         }
       );
 
@@ -72,15 +74,14 @@ export default function RegisterHospital() {
 
       if (res.ok && data.hospital) {
         setMessage("Hospital registered successfully!");
-        const existingHospitals = JSON.parse(localStorage.getItem("hospitals") || "[]");
-        const updatedHospitals = [...existingHospitals,  { hospital: data.hospital }];
-        localStorage.setItem(
-        "hospitals",
-       JSON.stringify(updatedHospitals)
-  );
 
-      setTimeout(() => router.push(`/dashboard/${data.hospital.id}`), 1200);
+        const existingHospitals = JSON.parse(
+          localStorage.getItem("hospitals") || "[]"
+        );
+        const updatedHospitals = [...existingHospitals, { hospital: data.hospital }];
+        localStorage.setItem("hospitals", JSON.stringify(updatedHospitals));
 
+        setTimeout(() => router.push(`/dashboard/${data.hospital.id}`), 1200);
       } else {
         setMessage(data.message || "Failed to register hospital");
       }
@@ -93,7 +94,9 @@ export default function RegisterHospital() {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">Loading...</div>
+    );
   }
 
   return (
@@ -106,7 +109,6 @@ export default function RegisterHospital() {
           </h2>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
-           
             <div className="relative">
               <label htmlFor="name" className="block text-gray-700 font-medium mb-1">
                 Hospital Name
@@ -124,7 +126,6 @@ export default function RegisterHospital() {
               />
             </div>
 
-           
             <div className="relative">
               <label htmlFor="email" className="block text-gray-700 font-medium mb-1">
                 Hospital Email
@@ -142,7 +143,6 @@ export default function RegisterHospital() {
               />
             </div>
 
-           
             <div className="relative">
               <label htmlFor="phone" className="block text-gray-700 font-medium mb-1">
                 Phone Number

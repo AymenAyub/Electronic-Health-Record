@@ -32,12 +32,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const rawHospitalId = params?.hospitalId;
   const hospitalId = Array.isArray(rawHospitalId) ? rawHospitalId[0] : rawHospitalId;
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+ const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    if (!storedToken)
+      {
+         router.push("/Login");
+         return;
+        }
+      setToken(storedToken);
+  }, [router]);
+
 
   useEffect(() => {
     const fetchUserData = async () => {
       if (!token) {
-        router.push("/Login");
         return;
       }
 
@@ -88,6 +98,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, []);
 
+ 
+  
   const handleHospitalSwitch = (id: string) => {
     if (id === "add") {
       router.push("/AddHospital");
@@ -107,14 +119,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         });
         if (!res.ok) return;
         const data = await res.json();
+         if (data.hospital) {
         setHospitalName(data.hospital.name);
         setSelectedHospital(data.hospital._id);
+      }
       } catch (err) {
         console.error(err);
       }
     };
     fetchHospital();
-  }, [hospitalId]);
+  }, [hospitalId, token]);
 
 
   const menuItemsConfig = [

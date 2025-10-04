@@ -38,14 +38,34 @@ export default function PatientProfilePage() {
   const [editingHistory, setEditingHistory] = useState<any>(null);
   const [deleteHistory, setDeleteHistory] = useState<string | null>(null);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  const role = typeof window !== "undefined" ? localStorage.getItem("role") : null;
+  const [token, setToken] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
+  const [authorized, setAuthorized] = useState(false);
 
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedToken = localStorage.getItem("token");
+      const storedRole = localStorage.getItem("role");
+
+      if (!storedToken || !storedRole) {
+        router.push("/Login");
+        return;
+      }
+
+      setToken(storedToken);
+      setRole(storedRole);
+      setAuthorized(true);
+    }
+  }, [router]);
+
+  // Fetch patient
+  useEffect(() => {
     const fetchPatient = async () => {
-              try {
-              let url = "";
+      if (!token || !authorized) return;
+
+      try {
+        let url = "";
         if (role === "Owner") {
           url = `http://localhost:5000/api/getPatients?hospitalId=${hospitalId}`;
         } else if (role === "Doctor") {
@@ -61,7 +81,6 @@ export default function PatientProfilePage() {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         });
-
 
         const data = await res.json();
         if (res.ok) {
@@ -84,37 +103,35 @@ export default function PatientProfilePage() {
     };
 
     if (hospitalId && patientId) fetchPatient();
-  }, [hospitalId, patientId, token]);
+  }, [hospitalId, patientId, token, authorized, role]);
 
-  const fetchHistory = async () => {
-    try {
-      const res = await fetch(
-        `http://localhost:5000/api/${patientId}?hospitalId=${hospitalId}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+
+    const fetchHistory = async () => {
+      if (!token || !authorized) return;
+      try {
+        const res = await fetch(
+          `http://localhost:5000/api/${patientId}?hospitalId=${hospitalId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const data = await res.json();
+        if (res.ok) {
+          setHistory(Array.isArray(data.history) ? data.history.filter(Boolean) : []);
+        } else {
+          console.error("Error fetching history:", data.message);
         }
-      );
-
-      const data = await res.json();
-      if (res.ok) {
-        setHistory(Array.isArray(data.history) ? data.history.filter(Boolean) : []);
-      } else {
-        console.error("Error fetching history:", data.message);
+      } catch (err) {
+        console.error("Error fetching history:", err);
       }
-    } catch (err) {
-      console.error("Error fetching history:", err);
-    }
-  };
+    };
 
-  useEffect(() => {
+useEffect(() => {
     if (hospitalId && patientId) fetchHistory();
   }, [hospitalId, patientId, token]);
 
-
+  
   const handleSaveHistory = async (formData: any) => {
+    if (!token || !authorized) return;
+
     try {
       const url = editingHistory
         ? `http://localhost:5000/api/updateHistory/${editingHistory.history_id}?hospitalId=${hospitalId}`
@@ -136,22 +153,10 @@ export default function PatientProfilePage() {
 
       const data = await res.json();
       if (res.ok) {
-        if (editingHistory) {
-          setHistory((prev) =>
-            prev.map((item) =>
-              item.history_id === data.history?.history_id ? data.history : item
-            )
-          );
-          toast.success("Medical history updated");
-        } else {
-          if (data.history?.history_id) {
-            setHistory((prev) => [data.history, ...prev]);
-          }
-          toast.success("Medical history added");
-        }
-        await fetchHistory();
+        await fetchHistory(); // refresh
         setIsModalOpen(false);
         setEditingHistory(null);
+        toast.success(editingHistory ? "Medical history updated" : "Medical history added");
       } else {
         toast.error(data.message || "Failed to save history");
       }
@@ -162,26 +167,25 @@ export default function PatientProfilePage() {
   };
 
   const handleDeleteHistory = async (historyId: string) => {
+    if (!token || !authorized) return;
+
     try {
       const res = await fetch(
         `http://localhost:5000/api/${historyId}?hospitalId=${hospitalId}`,
         {
           method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
       const data = await res.json();
       if (res.ok) {
         setHistory((prev) => prev.filter((h) => h?.history_id !== historyId));
-        fetchHistory();
         toast.success("History deleted");
       } else {
         toast.error(data.message || "Failed to delete history");
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error deleting history:", err);
       toast.error("Error deleting history");
     } finally {
@@ -197,7 +201,7 @@ export default function PatientProfilePage() {
     );
   }
 
-  if (error || !patient) {
+  if (!authorized || error || !patient) {
     return (
       <div className="p-6">
         <p className="text-red-600 font-medium flex items-center gap-2">

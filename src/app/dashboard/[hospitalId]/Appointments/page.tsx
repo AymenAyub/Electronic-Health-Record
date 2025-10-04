@@ -21,22 +21,40 @@ export default function AppointmentsPage() {
   const [loading, setLoading] = useState(true);
   const [editingAppointment, setEditingAppointment] = useState<any | null>(null);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  const userStr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
-  const user = userStr ? JSON.parse(userStr) : null;
-  const role = localStorage.getItem("role"); 
+  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [role, setRole] = useState<string | null>(null);
 
   const router = useRouter();
   const params = useParams();
   const hospitalId = params?.hospitalId;
 
-  console.log('role', role);
-  
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const t = localStorage.getItem("token");
+      const u = localStorage.getItem("user");
+      const r = localStorage.getItem("role");
+
+      if (!t || !u) {
+        console.log("token is missing");
+        router.push("/Login");
+        return;
+      }
+
+      setToken(t);
+      setUser(JSON.parse(u));
+      setRole(r);
+      setAuthorized(true);
+      setLoading(false);
+    }
+  }, [router]);
+
   const fetchAppointments = async () => {
+    if (!token) return;
     try {
       let url = "";
       if (role === "Doctor") {
-        url = "http://localhost:5000/api/getDoctorAppointments"; // only their appointments
+        url = "http://localhost:5000/api/getDoctorAppointments";
       } else {
         url = `http://localhost:5000/api/appointments?hospitalId=${hospitalId}`;
       }
@@ -58,51 +76,39 @@ export default function AppointmentsPage() {
       }
     } catch (err) {
       console.error(err);
-       toast.error("Error fetching appointments");
+      toast.error("Error fetching appointments");
     }
   };
 
   const fetchPatients = async () => {
-    if (role === "Doctor") return;
+    if (!token || role === "Doctor") return;
     try {
       const res = await fetch(`http://localhost:5000/api/getPatients?hospitalId=${hospitalId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       if (res.ok) setPatients(data.patients);
-      else  
-        toast.error(data.message || "Failed to fetch patients");
+      else toast.error(data.message || "Failed to fetch patients");
     } catch (err) {
       console.error(err);
-       toast.error("Error fetching patients");
+      toast.error("Error fetching patients");
     }
   };
 
   const fetchDoctors = async () => {
-    if (role === "doctor") return;
+    if (!token || role?.toLowerCase() === "doctor") return;
     try {
       const res = await fetch(`http://localhost:5000/api/getDoctors?hospitalId=${hospitalId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       if (res.ok) setDoctors(data.doctors);
-      else  toast.error(data.message || "Failed to fetch doctors");
+      else toast.error(data.message || "Failed to fetch doctors");
     } catch (err) {
       console.error(err);
-       toast.error("Error fetching doctors");
+      toast.error("Error fetching doctors");
     }
   };
-
-  useEffect(() => {
-    if (!token || !userStr) {
-      router.push("/Login");
-      return;
-    } else {
-      setLoading(false);
-      setAuthorized(true);
-      fetchDoctors();
-    }
-  }, [router]);
 
   useEffect(() => {
     if (hospitalId && token) {
@@ -113,6 +119,7 @@ export default function AppointmentsPage() {
   }, [hospitalId, token]);
 
   const handleSaveAppointment = async (appointmentData: any) => {
+    if (!token) return;
     try {
       const url = editingAppointment
         ? `http://localhost:5000/api/updateAppointment/${editingAppointment.id}?hospitalId=${hospitalId}`
@@ -133,13 +140,13 @@ export default function AppointmentsPage() {
         fetchAppointments();
         setIsModalOpen(false);
         setEditingAppointment(null);
-        toast.success(data.message || "Appointment save successfullly");
+        toast.success(data.message || "Appointment saved successfully");
       } else {
-         toast.error(data.message || "Failed to save appointment");
+        toast.error(data.message || "Failed to save appointment");
       }
     } catch (err) {
       console.error(err);
-       toast.error("Error saving appointment");
+      toast.error("Error saving appointment");
     }
   };
 
@@ -178,7 +185,6 @@ export default function AppointmentsPage() {
 
   if (!authorized) return null;
   if (loading) return <div className="flex items-center justify-center h-screen">Loading...</div>;
-
   return (
     <div className="flex max-w-7xl mx-auto p-6 gap-6 flex-col">
    
@@ -187,9 +193,9 @@ export default function AppointmentsPage() {
           <Calendar size={28} className="text-blue-600" />
          <div className="flex flex-col gap-1">
           <h1 className="text-3xl md:text-3xl font-bold text-blue-600 tracking-tight">
-            {role === "doctor"
+            {role === "Doctor"
               ? "Your Appointments"
-              : role === "staff"
+              : role === "Receptionist"
               ? "Schedule Appointments"
               : role === "Owner"
               ? "Manage Appointments"
@@ -197,9 +203,9 @@ export default function AppointmentsPage() {
           </h1>
 
           <p className="text-sm text-gray-500">
-            {role === "doctor"
+            {role === "Doctor"
               ? "View all your upcoming appointments"
-              : role === "staff"
+              : role === "Receptionist"
               ? "Add and manage appointments for your hospital"
               : role === "Owner"
               ? "Overview and control of all hospital appointments"
@@ -304,7 +310,7 @@ export default function AppointmentsPage() {
                     </span>
                   </td>
 
-                  {(role === "Admin" || role === "Owner" || role === "Receptioninst") && (
+                  {(role === "Admin" || role === "Owner" || role === "Receptionist") && (
                     <td className="px-6 py-3 flex gap-2">
                       <button
                         onClick={() => {

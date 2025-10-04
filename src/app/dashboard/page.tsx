@@ -12,7 +12,19 @@ export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [role, setRole] = useState<string | null>(null);
   const router = useRouter();
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const [token, setToken] = useState<string | null>(null);
+  
+useEffect(() => {
+  const storedToken = localStorage.getItem("token");
+  const storedRole = localStorage.getItem("role");
+  setToken(storedToken);
+  setRole(storedRole);
+
+  if (!storedToken) {
+    router.push("/Login");
+  }
+}, [router]);
+
   
   const handleAddHospital = () => {
     router.push("/AddHospital");
