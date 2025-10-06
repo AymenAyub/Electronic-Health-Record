@@ -48,7 +48,7 @@ export default function LoginPage() {
         localStorage.setItem("hospitals", JSON.stringify(data.hospitals));
         localStorage.setItem(
           "role",
-          data.defaultRole?.name || data.hospitals?.[0]?.role?.name
+         JSON.stringify(data.role)
         );
 
           const currentHospital = data.hospitals.find(
@@ -56,7 +56,7 @@ export default function LoginPage() {
             );
             localStorage.setItem(
               "permissions",
-              JSON.stringify(currentHospital?.role?.permissions || [])
+              JSON.stringify(data.permissions || [])
             );
          
         const defaultHospitalId =
