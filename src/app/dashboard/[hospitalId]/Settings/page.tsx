@@ -31,7 +31,7 @@ export default function SettingsPage() {
   useEffect(() => {
   const fetchUser = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/user/getMe", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/getMe`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
       if (!res.ok) throw new Error("Failed to fetch user");
@@ -52,7 +52,7 @@ export default function SettingsPage() {
 
  const handleSaveProfile = async () => {
   try {
-    const res = await fetch("http://localhost:5000/api/user/updateMe", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/updateMe`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -83,7 +83,7 @@ export default function SettingsPage() {
   }
 
   try {
-    const res = await fetch("http://localhost:5000/api/user/changePassword", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/changePassword`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

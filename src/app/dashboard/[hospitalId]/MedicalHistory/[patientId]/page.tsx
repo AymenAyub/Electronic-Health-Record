@@ -59,7 +59,6 @@ export default function PatientProfilePage() {
     }
   }, [router]);
 
-  // Fetch patient
   useEffect(() => {
     const fetchPatient = async () => {
       if (!token || !authorized) return;
@@ -67,9 +66,9 @@ export default function PatientProfilePage() {
       try {
         let url = "";
         if (role === "Owner") {
-          url = `http://localhost:5000/api/getPatients?hospitalId=${hospitalId}`;
+          url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/getPatients?hospitalId=${hospitalId}`;
         } else if (role === "Doctor") {
-          url = `http://localhost:5000/api/getDoctorPatients?hospitalId=${hospitalId}`;
+          url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/getDoctorPatients?hospitalId=${hospitalId}`;
         } else {
           setPatient(null);
           setError("Unauthorized");
@@ -110,7 +109,7 @@ export default function PatientProfilePage() {
       if (!token || !authorized) return;
       try {
         const res = await fetch(
-          `http://localhost:5000/api/${patientId}?hospitalId=${hospitalId}`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/${patientId}?hospitalId=${hospitalId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = await res.json();
@@ -134,8 +133,8 @@ useEffect(() => {
 
     try {
       const url = editingHistory
-        ? `http://localhost:5000/api/updateHistory/${editingHistory.history_id}?hospitalId=${hospitalId}`
-        : `http://localhost:5000/api/createHistory?hospitalId=${hospitalId}`;
+        ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/updateHistory/${editingHistory.history_id}?hospitalId=${hospitalId}`
+        : `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/createHistory?hospitalId=${hospitalId}`;
       const method = editingHistory ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -171,7 +170,7 @@ useEffect(() => {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/${historyId}?hospitalId=${hospitalId}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/${historyId}?hospitalId=${hospitalId}`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },

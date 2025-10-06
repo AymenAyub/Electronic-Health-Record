@@ -47,7 +47,7 @@ export default function PatientsPage() {
   const fetchPatients = async (authToken: string) => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/getPatients?hospitalId=${hospitalId}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/getPatients?hospitalId=${hospitalId}`,
         { headers: { Authorization: `Bearer ${authToken}` } }
       );
       const data = await res.json();
@@ -63,7 +63,7 @@ export default function PatientsPage() {
     if (!token) return;
     try {
       const res = await fetch(
-        `http://localhost:5000/api/patients/deletePatient/${id}?hospitalId=${hospitalId}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/patients/deletePatient/${id}?hospitalId=${hospitalId}`,
         {
           method: "DELETE",
           headers: {
@@ -91,8 +91,8 @@ export default function PatientsPage() {
     if (!token) return;
     try {
       const url = editingPatient
-        ? `http://localhost:5000/api/patients/updatePatient/${editingPatient.patient_id}?hospitalId=${hospitalId}`
-        : `http://localhost:5000/api/patients/addPatient?hospitalId=${hospitalId}`;
+        ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/patients/updatePatient/${editingPatient.patient_id}?hospitalId=${hospitalId}`
+        : `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/patients/addPatient?hospitalId=${hospitalId}`;
       const method = editingPatient ? "PUT" : "POST";
 
       const res = await fetch(url, {

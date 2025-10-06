@@ -74,7 +74,7 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     const fetchData = async () => {
       try {
 
-        const permData = await fetchWithAuth(`http://localhost:5000/api/permissions?hospitalId=${hospitalId}`) || [];
+        const permData = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/permissions?hospitalId=${hospitalId}`) || [];
             setAllPermissions(
               permData.map((p: any) => ({
                 id: p.permission_id,
@@ -85,7 +85,7 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
 
       
         const roleData = await fetchWithAuth(
-          `http://localhost:5000/api/roles?hospitalId=${hospitalId}`
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/roles?hospitalId=${hospitalId}`
         );
         const formattedRoles = roleData.map((r: any) => ({
           id: r.role_id,
@@ -107,7 +107,7 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
         }
        
         const usersData = await fetchWithAuth(
-          `http://localhost:5000/api/users?hospitalId=${hospitalId}`
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users?hospitalId=${hospitalId}`
         );
         const formattedUsers = usersData
           .filter((row: any) => row.user)
@@ -141,8 +141,8 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   const handleSaveRole = async (roleData: Role) => {
     try {
       const url = editingRole
-        ? `http://localhost:5000/api/updateRole/${editingRole.id}?hospitalId=${hospitalId}`
-        : `http://localhost:5000/api/addRole?hospitalId=${hospitalId}`;
+        ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/updateRole/${editingRole.id}?hospitalId=${hospitalId}`
+        : `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/addRole?hospitalId=${hospitalId}`;
       const method = editingRole ? "PUT" : "POST";
 
       const data = await fetchWithAuth(url, {
@@ -206,7 +206,7 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     if (!selectedRole) return;
     try {
       const data = await fetchWithAuth(
-        `http://localhost:5000/api/updateRole/${selectedRole.id}?hospitalId=${hospitalId}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/updateRole/${selectedRole.id}?hospitalId=${hospitalId}`,
         {
           method: "PUT",
           body: JSON.stringify({

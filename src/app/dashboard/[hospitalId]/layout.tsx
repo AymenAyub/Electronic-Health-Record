@@ -52,7 +52,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       }
 
       try {
-        const res = await fetch("http://localhost:5000/api/permissions/me", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/permissions/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -114,7 +114,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (!token || !hospitalId) return;
     const fetchHospital = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/hospital/${hospitalId}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/hospital/${hospitalId}`, {
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         });
         if (!res.ok) return;

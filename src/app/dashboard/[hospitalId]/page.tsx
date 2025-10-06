@@ -55,7 +55,7 @@ useEffect(() => {
 
     const fetchData = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/dashboard/stats?hospitalId=${hospitalId}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/dashboard/stats?hospitalId=${hospitalId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -75,7 +75,7 @@ useEffect(() => {
 
 
         const chartRes = await fetch(
-          `http://localhost:5000/api/getWeekAppointments?hospitalId=${hospitalId}`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/getWeekAppointments?hospitalId=${hospitalId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

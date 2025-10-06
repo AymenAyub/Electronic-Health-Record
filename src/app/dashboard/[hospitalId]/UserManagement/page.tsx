@@ -103,7 +103,7 @@ export default function UserManagement() {
   const fetchUsersAndRoles = async () => {
     try {
       const roleData = await fetchWithAuth(
-        `http://localhost:5000/api/roles?hospitalId=${hospitalId}`
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/roles?hospitalId=${hospitalId}`
       );
       const formattedRoles = roleData.map((r: any) => ({
         id: r.role_id,
@@ -119,7 +119,7 @@ export default function UserManagement() {
       setRoles(formattedRoles);
 
       const usersData = await fetchWithAuth(
-        `http://localhost:5000/api/users?hospitalId=${hospitalId}`
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users?hospitalId=${hospitalId}`
       );
       const formattedUsers = usersData.map((row: any) => ({
         id: row.user.user_id,
@@ -158,7 +158,7 @@ export default function UserManagement() {
 
       if (editingUser) {
         await fetchWithAuth(
-          `http://localhost:5000/api/updateUser/${editingUser.id}?hospitalId=${hospitalId}`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/updateUser/${editingUser.id}?hospitalId=${hospitalId}`,
           {
             method: "PUT",
             body: JSON.stringify(payload),
@@ -167,7 +167,7 @@ export default function UserManagement() {
         toast.success("User updated successfully");
       } else {
         await fetchWithAuth(
-          `http://localhost:5000/api/addUser?hospitalId=${hospitalId}`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/addUser?hospitalId=${hospitalId}`,
           {
             method: "POST",
             body: JSON.stringify(payload),
@@ -193,7 +193,7 @@ export default function UserManagement() {
     if (!deleteUserId) return;
     try {
       await fetchWithAuth(
-        `http://localhost:5000/api/deleteUser/${deleteUserId}?hospitalId=${hospitalId}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/deleteUser/${deleteUserId}?hospitalId=${hospitalId}`,
         { method: "DELETE" }
       );
       toast.success("User deleted successfully");

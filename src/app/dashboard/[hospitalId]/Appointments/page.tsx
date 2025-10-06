@@ -54,9 +54,9 @@ export default function AppointmentsPage() {
     try {
       let url = "";
       if (role === "Doctor") {
-        url = "http://localhost:5000/api/getDoctorAppointments";
+        url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/getDoctorAppointments`;
       } else {
-        url = `http://localhost:5000/api/appointments?hospitalId=${hospitalId}`;
+        url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/appointments?hospitalId=${hospitalId}`;
       }
 
       const res = await fetch(url, {
@@ -83,7 +83,7 @@ export default function AppointmentsPage() {
   const fetchPatients = async () => {
     if (!token || role === "Doctor") return;
     try {
-      const res = await fetch(`http://localhost:5000/api/getPatients?hospitalId=${hospitalId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/getPatients?hospitalId=${hospitalId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -98,7 +98,7 @@ export default function AppointmentsPage() {
   const fetchDoctors = async () => {
     if (!token || role?.toLowerCase() === "doctor") return;
     try {
-      const res = await fetch(`http://localhost:5000/api/getDoctors?hospitalId=${hospitalId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/getDoctors?hospitalId=${hospitalId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -122,8 +122,8 @@ export default function AppointmentsPage() {
     if (!token) return;
     try {
       const url = editingAppointment
-        ? `http://localhost:5000/api/updateAppointment/${editingAppointment.id}?hospitalId=${hospitalId}`
-        : `http://localhost:5000/api/scheduleAppointment?hospitalId=${hospitalId}`;
+        ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/updateAppointment/${editingAppointment.id}?hospitalId=${hospitalId}`
+        : `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/scheduleAppointment?hospitalId=${hospitalId}`;
       const method = editingAppointment ? "PUT" : "POST";
 
       const res = await fetch(url, {

@@ -36,7 +36,7 @@ export default function AddAppointmentModal({
       setLoadingSlots(true);
       try {
         const res = await fetch(
-          `http://localhost:5000/api/doctors/${formData.doctor_id}/availability?date=${selectedDate}&hospital_id=${hospitalId}`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/doctors/${formData.doctor_id}/availability?date=${selectedDate}&hospital_id=${hospitalId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = await res.json();

@@ -38,7 +38,7 @@ useEffect(() => {
         }
   
         try {
-          const res = await fetch("http://localhost:5000/api/permissions/me", {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/permissions/me`, {
             headers: { Authorization: `Bearer ${token}` },
           });
   

@@ -59,7 +59,7 @@ export default function RegisterHospital() {
 
     try {
       const res = await fetch(
-        "http://localhost:5000/api/hospital/registerHospital",
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/hospital/registerHospital`,
         {
           method: "POST",
           headers: {

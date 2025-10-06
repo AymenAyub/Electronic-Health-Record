@@ -60,7 +60,7 @@ export default function DoctorAvailability() {
 
   const fetchDoctors = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/getDoctors?hospitalId=${hospitalId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/getDoctors?hospitalId=${hospitalId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
     
@@ -77,7 +77,7 @@ export default function DoctorAvailability() {
     try {
       if (!role) return;
 
-      let url = `http://localhost:5000/api/getMyAvailability?hospitalId=${hospitalId}`;
+      let url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/getMyAvailability?hospitalId=${hospitalId}`;
       if (role !== "Doctor" && currentSlot.doctorId) url += `&doctorId=${currentSlot.doctorId}`;
 
       const res = await fetch(url, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
@@ -119,7 +119,7 @@ export default function DoctorAvailability() {
 
       if (role === "Owner" || role === "Admin") body.doctorId = currentSlot.doctorId;
 
-      const res = await fetch(`http://localhost:5000/api/addAvailability?hospitalId=${hospitalId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/addAvailability?hospitalId=${hospitalId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` },
         body: JSON.stringify(body),
@@ -175,7 +175,7 @@ export default function DoctorAvailability() {
       if (!slotId) return;
 
       const res = await fetch(
-        `http://localhost:5000/api/deleteAvailability/${slotId}?hospitalId=${hospitalId}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/deleteAvailability/${slotId}?hospitalId=${hospitalId}`,
         { method: "DELETE", headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
 

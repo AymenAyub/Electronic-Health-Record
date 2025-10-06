@@ -48,7 +48,7 @@ export default function DoctorsPage() {
   const fetchDoctors = async (authToken: string) => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/getDoctors?hospitalId=${hospitalId}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/getDoctors?hospitalId=${hospitalId}`,
         { headers: { Authorization: `Bearer ${authToken}` } }
       );
       const data = await res.json();
@@ -64,7 +64,7 @@ export default function DoctorsPage() {
     if (!token) return;
     try {
       const res = await fetch(
-        `http://localhost:5000/api/admin/deleteUser/${id}?hospitalId=${hospitalId}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/deleteUser/${id}?hospitalId=${hospitalId}`,
         {
           method: "DELETE",
           headers: {
@@ -93,8 +93,8 @@ export default function DoctorsPage() {
     if (!token) return;
     try {
       const url = editingDoctor
-        ? `http://localhost:5000/api/updateUser/${editingDoctor.user_id}?hospitalId=${hospitalId}`
-        : "http://localhost:5000/api/admin/addDoctor";
+        ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/updateUser/${editingDoctor.user_id}?hospitalId=${hospitalId}`
+        : `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/addDoctor`;
 
       const method = editingDoctor ? "PUT" : "POST";
 

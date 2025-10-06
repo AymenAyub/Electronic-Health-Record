@@ -42,9 +42,9 @@ useEffect(() => {
       let url = "";
 
       if (role === "Owner") {
-        url = `http://localhost:5000/api/getPatients?hospitalId=${hospitalId}`;
+        url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/getPatients?hospitalId=${hospitalId}`;
       } else if (role === "Doctor") {
-        url = `http://localhost:5000/api/getDoctorPatients?hospitalId=${hospitalId}`;
+        url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/getDoctorPatients?hospitalId=${hospitalId}`;
       } else {
         setPatients([]);
         return;
