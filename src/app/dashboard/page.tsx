@@ -12,18 +12,22 @@ export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [role, setRole] = useState<string | null>(null);
   const router = useRouter();
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null); 
   
 useEffect(() => {
   const storedToken = localStorage.getItem("token");
+   console.log("No token 4");
+
   const storedRole = localStorage.getItem("role");
   setToken(storedToken);
   setRole(storedRole);
 
   if (!storedToken) {
+    console.log("No token");
     router.push("/Login");
   }
 }, [router]);
+ console.log("No token 3");
 
   
   const handleAddHospital = () => {
@@ -33,13 +37,13 @@ useEffect(() => {
    useEffect(() => {
       const fetchUserData = async () => {
         if (!token) {
-          router.push("/Login");
+          console.log("No token");
           return;
         }
   
         try {
           const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/permissions/me`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           });
   
           if (!res.ok) {

@@ -46,9 +46,9 @@ export default function LoginPage() {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("hospitals", JSON.stringify(data.hospitals));
-        localStorage.setItem(
+       localStorage.setItem(
           "role",
-         JSON.stringify(data.role)
+          data.defaultRole?.name || data.hospitals?.[0]?.role?.name
         );
 
           const currentHospital = data.hospitals.find(
@@ -56,9 +56,9 @@ export default function LoginPage() {
             );
             localStorage.setItem(
               "permissions",
-              JSON.stringify(data.permissions || [])
+              JSON.stringify(currentHospital?.role?.permissions || [])
             );
-         
+            
         const defaultHospitalId =
           data.defaultHospitalId ?? data.hospitals?.[0]?.hospital?.id ?? null;
 
