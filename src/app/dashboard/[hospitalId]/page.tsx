@@ -31,24 +31,22 @@ export default function DashboardPage() {
   const [token, setToken] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
 
-useEffect(() => {
-  if (typeof window !== "undefined") {
-    const storedToken = localStorage.getItem("token");
-    const storedRole = localStorage.getItem("role");
-    setToken(storedToken);
-    setRole(storedRole);
-    if (!storedToken) router.push("/Login");
-  }
-}, [router]);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedToken = localStorage.getItem("token");
+      const storedRole = localStorage.getItem("role");
+      setToken(storedToken);
+      setRole(storedRole);
+      if (!storedToken) router.push("/Login");
+    }
+  }, [router]);
 
-
- useEffect(() => {
-  if (typeof window !== "undefined") {
-    const storedHospitals = JSON.parse(localStorage.getItem("hospitals") || "[]");
-    setHospitals(storedHospitals);
-  }
-}, []);
-
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedHospitals = JSON.parse(localStorage.getItem("hospitals") || "[]");
+      setHospitals(storedHospitals);
+    }
+  }, []);
 
   useEffect(() => {
     if (!hospitalId || !token || hospitals.length === 0) return;
@@ -72,7 +70,6 @@ useEffect(() => {
           appointmentsToday: data.appointmentsToday ?? 0,
           revenueCollected: data.revenueCollected ?? 0,
         });
-
 
         const chartRes = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/getWeekAppointments?hospitalId=${hospitalId}`,
@@ -146,44 +143,94 @@ useEffect(() => {
         <div> 
           <h1 className="text-3xl font-bold">Welcome to your Dashboard</h1> 
           <p className="mt-1 text-sm opacity-90">Here's your daily summary</p> 
-          </div> 
-          <Stethoscope size={40} className="opacity-90" /> 
-        </div>
+        </div> 
+        <Stethoscope size={40} className="opacity-90" /> 
+      </div>
 
-
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      {cards.map(({ label, value, icon }) => (
-        <div
-          key={label}
-          className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-lg transition"
-        >
-          {/* Icon + Value in one line */}
-          <div className="flex items-center gap-2 text-gray-900">
-            <span className="text-blue-600">{icon}</span>
-            <span className="text-2xl font-bold">{value}</span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {cards.map(({ label, value, icon }) => (
+          <div
+            key={label}
+            className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-lg transition"
+          >
+            <div className="flex items-center gap-2 text-gray-900">
+              <span className="text-blue-600">{icon}</span>
+              <span className="text-2xl font-bold">{value}</span>
+            </div>
+            <span className="text-sm text-gray-500 mt-2">{label}</span>
           </div>
+        ))}
+      </div>
 
-          {/* Label below */}
-          <span className="text-sm text-gray-500 mt-2">{label}</span>
+      {/* Quick Actions Section */}
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 mb-8 border border-blue-100">
+        <h3 className="text-xl font-bold text-gray-800 mb-3">Quick Actions</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <button 
+          onClick={() => router.push(`/dashboard/${hospitalId}/Appointments`)}
+          className="bg-white hover:bg-blue-50 text-blue-600 font-semibold py-3 px-4 rounded-lg shadow-sm transition flex items-center justify-center gap-2 border border-blue-200">
+            <CalendarCheck size={18} />
+            Schedule Appointment
+          </button>
+          <button 
+          onClick={() => router.push(`/dashboard/${hospitalId}/Patients`)}
+          className="bg-white hover:bg-blue-50 text-blue-600 font-semibold py-3 px-4 rounded-lg shadow-sm transition flex items-center justify-center gap-2 border border-blue-200">
+            <User size={18} />
+            Add New Patient
+          </button>
+          <button 
+          onClick={() => router.push(`/dashboard/${hospitalId}/UserManagement`)}
+          className="bg-white hover:bg-blue-50 text-blue-600 font-semibold py-3 px-4 rounded-lg shadow-sm transition flex items-center justify-center gap-2 border border-blue-200">
+            <User size={18} />
+            View Users
+          </button>
         </div>
-      ))}
+      </div>
+
+      {/* Tips & Info Card */}
+     
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+  {/* Appointments Line Chart (left, spans 2 columns) */}
+  <div className="lg:col-span-2">
+    <div className="bg-white p-6 rounded-xl shadow-md">
+      <h3 className="text-lg font-semibold mb-4">Appointments This Week</h3>
+      <ResponsiveContainer width="100%" height={250}>
+        <LineChart data={chartData}>
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Line type="monotone" dataKey="Appointments" stroke="#3B82F6" strokeWidth={3} />
+        </LineChart>
+      </ResponsiveContainer>
     </div>
+  </div>
 
+  {/* Quick Tips (right, smaller) */}
+  <div>
+    <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl shadow-md border border-green-100 mb-8">
+      <h3 className="text-lg font-semibold mb-4 text-gray-800">💡 Quick Tips</h3>
+      <ul className="space-y-3">
+        <li className="flex items-start gap-2 text-gray-700">
+          <span className="text-green-500 font-bold">•</span>
+          <span>Keep patient records updated for better care coordination</span>
+        </li>
+        <li className="flex items-start gap-2 text-gray-700">
+          <span className="text-green-500 font-bold">•</span>
+          <span>Schedule appointments during low-traffic hours for efficiency</span>
+        </li>
+        <li className="flex items-start gap-2 text-gray-700">
+          <span className="text-green-500 font-bold">•</span>
+          <span>Regular follow-ups improve patient satisfaction rates</span>
+        </li>
+        <li className="flex items-start gap-2 text-gray-700">
+          <span className="text-green-500 font-bold">•</span>
+          <span>Monitor your dashboard daily to stay ahead of operations</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
 
-        {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8"> */}
-        <div className="mb-8">
-          {/* Line Chart */}
-          <div className="bg-white p-6 rounded-xl shadow-md">
-            <h3 className="text-lg font-semibold mb-4">Appointments This Week</h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={chartData}>
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="Appointments" stroke="#3B82F6" strokeWidth={3} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
 
           {/* Pie Chart
           <div className="bg-white p-6 rounded-xl shadow-md">
@@ -208,8 +255,8 @@ useEffect(() => {
               </PieChart>
             </ResponsiveContainer>
           </div> */}
-        </div>
-
-      </div>
+       
+      
+    </div>
   );
 }
