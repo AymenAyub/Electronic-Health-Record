@@ -1,134 +1,103 @@
-# MediNex - SaaS-Based Outpatient Hospital Management System
+# MediNex - SaaS-Based Outpatient Hospital Management System (Frontend)
 
 ## Introduction
 
-MediNex is a SaaS-based hospital management system designed to help hospitals and clinics manage patients, staff, appointments, and medical records from a unified platform. The system supports multiple hospitals under a single platform (multi-tenant architecture), ensuring secure data isolation for each hospital.
+This is the frontend of **MediNex**, a SaaS-based outpatient hospital management system designed to help hospitals and clinics manage patients, staff, and appointments from a unified platform.
+
+The system supports multiple hospitals under a single platform (multi-tenant architecture), ensuring secure data isolation for each hospital. This frontend interacts with a backend REST API to provide a complete hospital management experience.
 
 ### Purpose and Goals
 
-- Simplify hospital administrative workflows by centralizing hospital operations
-- Improve efficiency, data accuracy, and security in healthcare systems
-- Provide a scalable SaaS platform for multiple hospitals and clinics
-- Enhance patient care through structured medical history and appointment scheduling
+- Provide a clean and responsive interface for hospital operations  
+- Simplify hospital workflows through centralized UI dashboards  
+- Support role-based access views for different users  
+- Enable smooth interaction with backend APIs  
+- Improve usability and accessibility for healthcare staff  
 
 ---
 
 ## Problem Statement
 
-Many hospitals and clinics still rely on manual processes or outdated systems, leading to:
+Many hospitals still rely on manual or outdated systems, leading to:
 
-- Missed or double-booked appointments
-- Scattered or inaccessible patient records
-- Lack of communication between doctors and staff
-- Inefficient reporting and record-keeping
-- No centralized system for outpatient management
+- Missed or double-booked appointments  
+- Scattered patient records  
+- Lack of coordination between staff and doctors  
+- Inefficient data handling  
 
-MediNex solves these issues by providing a modern, scalable, and centralized SaaS solution.
+This project solves these issues by providing a structured and intuitive interface for managing hospital operations.
 
 ---
 
 ## System Overview
 
-MediNex is a SaaS (Software as a Service) platform that enables hospitals to manage outpatient operations efficiently in one system.
+This frontend is part of the MediNex SaaS platform and includes:
 
-The system includes:
-
-- Patient onboarding and registration
-- Appointment scheduling system
-- Medical history tracking
-- Role-based access control (RBAC)
-- Multi-hospital (multi-tenant) architecture
+- Patient onboarding UI  
+- Appointment scheduling interface  
+- Medical history visualization  
+- Role-based dashboards  
+- Multi-hospital switching interface  
 
 ---
 
 ## Technology Stack
 
 Frontend: Next.js + Tailwind CSS  
-Backend: Node.js + Express  
+Backend API: Node.js + Express  
 Database: MySQL  
 Authentication: JWT + Bcrypt.js  
-Hosting: Vercel (Frontend) / Railway (Backend)
+Hosting: Vercel (Frontend) / Railway (Backend API)
 
 ---
 
 ## Key Features
 
-### 1. Owner Onboarding & Hospital Registration
-
-- When a user logs in for the first time, they are prompted to register a hospital
-- The Owner account is automatically assigned administrative privileges
-- Owners can register and manage multiple hospitals under one account
-- Easy switching between hospitals from the dashboard
-
-Each hospital has isolated data including patients, staff, appointments, and records to ensure privacy and scalability.
+### 1. Owner Onboarding & Hospital Registration UI
+- Interface for registering hospitals  
+- Multi-hospital switching dashboard  
+- Owner-level administrative UI controls  
 
 ---
 
-### 2. Role & Permission Management (RBAC)
-
-- Owners can create and manage roles such as Admin, Doctor, Receptionist, and Staff
-- Each role has specific permissions (e.g., edit patients, manage appointments)
-- Accessible from the Role Management section in the dashboard
-
-This system ensures strict access control and security for all users.
+### 2. Role-Based Dashboards (RBAC UI)
+- Separate views for Admin, Doctor, Receptionist, and Staff  
+- UI adapts based on user permissions  
+- Secure navigation and access control  
 
 ---
 
-### 3. User Management
-
-- Owners can add and manage hospital users
-- Each user is assigned a role with predefined permissions
-- Users include doctors, staff, and admins
-- Each user gets individual login credentials and dashboards
-
-This ensures structured onboarding and controlled access.
+### 3. User Management Interface
+- Add and manage hospital users  
+- Assign roles to users  
+- View staff and doctor lists  
 
 ---
 
-### 4. Patient Registration & Management
-
-Patient data is stored permanently for future visits.
-
-Captured Information:
-- Name, Age, Gender, Contact Details  
-- CNIC, Guardian Information  
-- Address and Emergency Contact  
-
-This eliminates duplicate entries and improves record accuracy.
+### 4. Patient Management UI
+- Register new patients  
+- View and update patient information  
+- Maintain structured patient records  
 
 ---
 
-### 5. Doctor Availability Management
-
-- Owners can define doctors’ schedules and availability
-- Working days and time slots can be configured
-- Prevents scheduling conflicts and double bookings
-
-This ensures efficient appointment planning.
+### 5. Doctor Availability UI
+- Visual scheduling interface for doctor availability  
+- Working days and time slots configuration view  
 
 ---
 
-### 6. Appointment Scheduling System
-
-- Staff can schedule appointments based on doctor availability
-- View, reschedule, or cancel appointments
-- Each appointment is linked to both patient and doctor
-- Weekly overview available for doctors and owners
-
-This system ensures smooth patient flow and time management.
+### 6. Appointment Scheduling Interface
+- Schedule, reschedule, and cancel appointments  
+- Calendar-based appointment view  
+- Link appointments with patients and doctors  
 
 ---
 
-### 7. Patient Medical History
-
-Each patient has a complete medical record accessible to authorized users.
-
-Stored Information:
-- Past complaints
-- Diagnoses
-- Prescribed medicines
-
-Doctors can review full history before consultation for accurate treatment.
+### 7. Patient Medical History UI
+- View patient medical history  
+- Display past diagnoses and prescriptions  
+- Easy access for doctors during consultation  
 
 ---
 
@@ -151,14 +120,13 @@ Note: Backend is currently inactive due to Railway trial expiration.
 
 ## Future Improvements
 
-- Cloud deployment for backend stability  
-- Advanced analytics dashboard for hospitals  
-- AI-based diagnosis suggestions  
-- Notification system for appointments  
-
+- Real-time notifications for appointments  
+- Advanced analytics dashboard  
+- Mobile application support  
+- Offline mode for clinics  
 
 ---
 
 ## License
 
-This project is developed for educational and portfolio purposes.
+This project is for educational and portfolio purposes.
